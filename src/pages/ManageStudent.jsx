@@ -453,10 +453,10 @@ const ManageStudent = () => {
               <p><strong>Avatar:</strong>{' '}
                 {selectedStudent.avatar ? (
                   <img
-                    src={selectedStudent.avatar || 'https://via.placeholder.com/40'}
+                    src={selectedStudent.avatar || 'https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg'}
                     alt={`${selectedStudent.firstName} ${selectedStudent.lastName}`}
                     className="w-10 h-10 rounded-full object-cover inline-block"
-                    onError={(e) => (e.target.src = 'https://via.placeholder.com/40')}
+                    onError={(e) => (e.target.src = '')}
                   />
                 ) : (
                   'N/A'
@@ -538,10 +538,10 @@ const ManageStudent = () => {
                 >
                   <td className="py-4 px-6 flex items-center space-x-3">
                     <img
-                      src={student.avatar || 'https://via.placeholder.com/40'}
+                      src={'https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg'}
                       alt={`${student.firstName} ${student.lastName}`}
                       className="w-10 h-10 rounded-full object-cover"
-                      onError={(e) => (e.target.src = 'https://via.placeholder.com/40')}
+                      onError={(e) => (e.target.src = '')}
                     />
                     <span className="text-sm text-gray-800 font-medium">{`${student.firstName} ${student.lastName}`}</span>
                   </td>
@@ -586,10 +586,10 @@ const ManageStudent = () => {
           >
             <div className="flex items-center space-x-3 mb-3">
               <img
-                src={student.avatar || 'https://via.placeholder.com/40'}
+                src={'https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg'}
                 alt={`${student.firstName} ${student.lastName}`}
                 className="w-12 h-12 rounded-full object-cover"
-                onError={(e) => (e.target.src = 'https://via.placeholder.com/40')}
+                onError={(e) => (e.target.src = '')}
               />
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">{`${student.firstName} ${student.lastName}`}</h3>
