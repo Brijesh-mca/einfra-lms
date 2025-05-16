@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+*{
+    font-family: Arial, Helvetica, sans-serif;
+ 
+}
+
+.card-bg{
+    background-color: #99DEDE;
+}
+.btn-border{
+    border: 2px solid #99DEDE;
+}
+.btn-bg{
+    background-color: #99DEDE;
+}
+body{
+  overflow-x: hidden;
+}
+
+/* styles/globals.css */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
