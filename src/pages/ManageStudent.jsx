@@ -290,7 +290,7 @@ const ManageStudent = () => {
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Manage Students</h1>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+          className="card-bg text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
         >
           Enroll Student
         </button>
@@ -425,7 +425,7 @@ const ManageStudent = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+                  className="px-4 py-2 card-bg text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
                 >
                   Enroll
                 </button>
@@ -565,7 +565,7 @@ const ManageStudent = () => {
                   <td className="py-4 px-6 text-sm">
                     <button
                       onClick={() => openDetailsPopup(student)}
-                      className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                      className="card-bg text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
                     >
                       More
                     </button>
@@ -612,7 +612,7 @@ const ManageStudent = () => {
               <div className="mt-3">
                 <button
                   onClick={() => openDetailsPopup(student)}
-                  className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                  className="card-bg text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
                 >
                   More
                 </button>
