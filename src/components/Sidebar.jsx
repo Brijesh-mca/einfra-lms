@@ -10,8 +10,10 @@ import {
   FaCog,
   FaSignOutAlt,
 } from 'react-icons/fa';
+import { useAuth } from '../AuthContext';
 
 export default function Sidebar({ onLinkClick }) {
+  const { user, logout } = useAuth();
   const linkClass =
     'flex items-center gap-3 p-2 rounded-md text-gray-700 hover:bg-gray-200 transition-colors duration-200 ease-in-out';
   const activeClass = 'text-black font-semibold';
@@ -20,8 +22,15 @@ export default function Sidebar({ onLinkClick }) {
     if (onLinkClick) onLinkClick();
   };
 
+  const handleLogout = () => {
+    logout();
+    handleClick();
+  };
+
+  if (!user) return null; // Hide sidebar if not authenticated
+
   return (
-    <div className="w-64 text-white border-r h-full flex flex-col justify-between rounded-xl shadow-md p-4 border-none">
+    <div className="w-64 bg-white text-white border-r h-full flex flex-col justify-between rounded-xl shadow-md p-4 border-none">
       <div>
         <div className="flex items-center justify-left pl-[1rem] mb-8">
           <div className="text-xl font-bold text-cyan-500">LMS</div>
@@ -82,19 +91,21 @@ export default function Sidebar({ onLinkClick }) {
           >
             <FaUserGraduate size={18} className="text-black" /> Manage Student
           </NavLink>
+         
+         
         </nav>
       </div>
       <div className="mt-6">
         <div className="flex items-center space-x-3">
           <img
-            src="https://i.pravatar.cc/40"
-            alt="Admin"
+            src={user.avatar}
+            alt={`${user.firstName} ${user.lastName}`}
             className="rounded-full w-10 h-10"
           />
           <div>
-            <p className="text-sm font-semibold text-white">Admin</p>
+            <p className="text-sm font-semibold text-gray-700">{user.firstName}</p>
             <span className="text-xs text-green-800 bg-green-100 px-2 py-1 rounded-md">
-              Admin
+              {user.role}
             </span>
           </div>
         </div>
@@ -109,8 +120,8 @@ export default function Sidebar({ onLinkClick }) {
             <FaCog size={16} className="text-black" /> Settings
           </NavLink>
           <NavLink
-            to="/logout"
-            onClick={handleClick}
+            to="/login"
+            onClick={handleLogout}
             className={({ isActive }) =>
               isActive
                 ? `${linkClass} ${activeClass} text-red-400`

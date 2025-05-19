@@ -14,6 +14,9 @@
 .btn-bg{
     background-color: #49BBBD;
 }
+.clr{
+    color: #49BBBD;
+}
 body{
   overflow-x: hidden;
 }

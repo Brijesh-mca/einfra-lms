@@ -1,68 +1,144 @@
 import { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { AuthProvider } from './AuthContext';
+import ProtectedRoute from './ProtectedRoute';
 import Sidebar from './components/Sidebar';
+import Login from './Login';
 import Dashboard from './pages/Dashboard';
 import ViewTicket from './pages/ViewTicket';
 import TrackActivities from './pages/TrackActivities';
-import Memberships from './pages/Memberships';
-import RevenuesReport from './pages/RevenuesReport';
+import Memberships from './pages/Allmember/Memberships';
+import RevenuesReport from './pages/RevenueReport/RevenuesReport';
 import ManageCourses from './pages/ManageCourses';
 import ManageInstructor from './pages/ManageInstructor';
 import ManageStudent from './pages/ManageStudent';
+import { Menu } from 'lucide-react';
+import { useAuth } from './AuthContext';
 
-import { Menu } from 'lucide-react'; // or use emoji/icon if you prefer
-
-function App() {
+// Child component to ensure useAuth is called inside AuthProvider
+function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
+
+  // Hide sidebar on login page
+  const isLoginPage = location.pathname === '/login';
+  const showSidebar = isAuthenticated && !isLoginPage;
 
   return (
     <div className="min-h-screen flex bg-gray-50 mt-7">
-      {/* Sidebar - Fixed on all screen sizes */}
-      <aside
-        className={`
-          fixed top-0 left-0 h-full w-64 z-40 bg-white shadow-md
-          transform transition-transform duration-300
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0
-        `}
-      >
-        <Sidebar onLinkClick={() => setSidebarOpen(false)} />
-      </aside>
+      {/* Sidebar - Fixed on all screen sizes, only shown when authenticated and not on login page */}
+      {showSidebar && (
+        <>
+          <aside
+            className={`
+              fixed top-0 left-0 h-full w-64 z-40 bg-white shadow-md
+              transform transition-transform duration-300
+              ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+              lg:translate-x-0
+            `}
+          >
+            <Sidebar onLinkClick={() => setSidebarOpen(false)} />
+          </aside>
 
-      {/* Overlay on mobile */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black bg-opacity-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+          {/* Overlay on mobile */}
+          {sidebarOpen && (
+            <div
+              className="fixed inset-0 z-30 bg-black bg-opacity-40 lg:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
+
+          {/* Mobile Toggle Button */}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border rounded shadow-md"
+          >
+            <Menu />
+          </button>
+        </>
       )}
 
-      {/* Mobile Toggle Button */}
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border rounded shadow-md"
-      >
-        <Menu />
-      </button>
-
-      {/* Main Content - with left margin for sidebar on desktop */}
-      <main className="flex-1 ml-0 lg:ml-64 p-4 overflow-x-auto">
+      {/* Main Content - Adjust margin based on sidebar visibility */}
+      <main className={`flex-1 ${showSidebar ? 'lg:ml-64' : 'ml-0'} p-4 overflow-x-auto`}>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/manage-courses" element={<ManageCourses />} />
-          <Route path="/track-activities" element={<TrackActivities />} />
-          <Route path="/view-ticket" element={<ViewTicket />} />
-          <Route path="/manage-instructor" element={<ManageInstructor />} />
-          <Route path="/manage-student" element={<ManageStudent />} />
-         
-{/* //inside the admin panel */}
-          <Route path="/memberships" element={<Memberships />} />
-        
-          <Route path="/revenues-report" element={<RevenuesReport />} />
-
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manage-courses"
+            element={
+              <ProtectedRoute>
+                <ManageCourses />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/track-activities"
+            element={
+              <ProtectedRoute>
+                <TrackActivities />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/view-ticket"
+            element={
+              <ProtectedRoute>
+                <ViewTicket />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manage-instructor"
+            element={
+              <ProtectedRoute>
+                <ManageInstructor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manage-student"
+            element={
+              <ProtectedRoute>
+                <ManageStudent />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/memberships"
+            element={
+              <ProtectedRoute>
+                <Memberships />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/revenues-report"
+            element={
+              <ProtectedRoute>
+                <RevenuesReport />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
     </div>
   );
 }
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
+
 export default App;

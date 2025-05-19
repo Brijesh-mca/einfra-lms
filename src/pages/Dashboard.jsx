@@ -38,7 +38,7 @@ const ProgressCard = ({ title, value, percent }) => {
           <path
             d="M2 18 A16 16 0 0 1 34 18"
             fill="none"
-            stroke="#2dd4bf"
+            stroke="#49BBBD"
             strokeWidth="4"
             strokeDasharray="42.2 50"
             strokeLinecap=""
@@ -50,7 +50,7 @@ const ProgressCard = ({ title, value, percent }) => {
       </div>
       <a
         href="#"
-        className="text-sm text-teal-500 hover:underline text-center block"
+        className="text-sm clr hover:underline text-center block"
       >
         All goals →
       </a>
@@ -118,7 +118,7 @@ export default function Dashboard() {
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       {/* Info Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <InfoCard
+        <InfoCard  
           title="Revenues"
           value="$500"
           link="Revenues report"
