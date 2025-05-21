@@ -11,53 +11,48 @@ export default function ViewTicket() {
   const [resolvedTickets, setResolvedTickets] = useState(0);
   const [totalTicketsGrowth, setTotalTicketsGrowth] = useState(null);
   const [resolvedTicketsGrowth, setResolvedTicketsGrowth] = useState(null);
-  const [limit] = useState(10); // Items per page
+  const [limit] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [downloadError, setDownloadError] = useState(null);
 
-  // Retrieve token from localStorage
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem("authToken");
 
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        // Configure Axios with default headers
         const axiosInstance = axios.create({
-          baseURL: 'https://lms-backend-flwq.onrender.com/api/v1/admin',
+          baseURL: "https://lms-backend-flwq.onrender.com/api/v1/admin",
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         });
 
-        // Calculate date ranges
-        const today = new Date('2025-05-21');
+        const today = new Date("2025-05-21");
         const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
         const previousMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
         const previousMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
 
-        const formatDate = (date) => date.toISOString().split('T')[0];
+        const formatDate = (date) => date.toISOString().split("T")[0];
 
-        // Fetch current month's tickets
         const currentResponse = await axiosInstance.get(
           `/tickets?page=${page}&limit=${limit}&startDate=${formatDate(currentMonthStart)}&endDate=${formatDate(today)}`
         );
         const currentData = currentResponse.data;
 
-        // Map current ticket data
+        // Map tickets, using ticket._id for both download and display
         const mappedTickets = currentData.data.map((ticket) => ({
-          ticketId: ticket.user._id, // Full user._id for display and download
+          ticketId: ticket._id, // Use ticket._id for download and display
           name: `${ticket.user.firstName} ${ticket.user.lastName}`,
           category: ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1),
           status: ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1),
-          _id: ticket._id, // Store outer _id for unique key
+          _id: ticket._id,
         }));
 
         const currentTotal = currentData.total || mappedTickets.length;
         const currentResolved = mappedTickets.filter((t) => t.status.toLowerCase() === "resolved").length;
 
-        // Fetch previous month's tickets
         const previousResponse = await axiosInstance.get(
           `/tickets?startDate=${formatDate(previousMonthStart)}&endDate=${formatDate(previousMonthEnd)}`
         );
@@ -68,7 +63,6 @@ export default function ViewTicket() {
           (t) => t.status.toLowerCase() === "resolved"
         ).length;
 
-        // Calculate percentage change
         const calculateGrowth = (current, previous) => {
           if (previous === 0) return "N/A";
           const change = ((current - previous) / previous) * 100;
@@ -82,11 +76,12 @@ export default function ViewTicket() {
         setResolvedTicketsGrowth(calculateGrowth(currentResolved, previousResolved));
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching tickets:', error);
-        const errorMessage = error.response?.data?.message || 
-                            error.response?.status === 401 
-                            ? 'Unauthorized: Please check your token or log in again.' 
-                            : 'Failed to fetch tickets. Please try again later.';
+        console.error("Error fetching tickets:", error);
+        const errorMessage =
+          error.response?.data?.message ||
+          (error.response?.status === 401
+            ? "Unauthorized: Please check your token or log in again."
+            : "Failed to fetch tickets. Please try again later.");
         setError(errorMessage);
         setLoading(false);
       }
@@ -95,38 +90,40 @@ export default function ViewTicket() {
     if (token) {
       fetchTickets();
     } else {
-      setError('No authentication token found. Please log in.');
+      setError("No authentication token found. Please log in.");
       setLoading(false);
     }
   }, [token, page, limit]);
 
-  // Handle download button click
   const handleDownload = async (ticketId) => {
     try {
       setDownloadError(null);
       const axiosInstance = axios.create({
-        baseURL: 'https://lms-backend-flwq.onrender.com/api/v1/admin',
+        baseURL: "https://lms-backend-flwq.onrender.com/api/v1/admin",
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
-        responseType: 'blob', // Expect binary data
+        responseType: "blob",
       });
 
       const response = await axiosInstance.get(`/tickets/${ticketId}/download`);
-      const blob = new Blob([response.data], { type: response.headers['content-type'] });
+      const contentType = response.headers["content-type"];
+      const extension = contentType.includes("pdf") ? "pdf" : "json";
+      const blob = new Blob([response.data], { type: contentType });
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.download = `ticket-${ticketId}.pdf`; // Adjust extension if not PDF
+      link.download = `ticket-${ticketId}.${extension}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading ticket:', error);
-      const errorMessage = error.response?.status === 401 
-        ? 'Unauthorized: Please check your token or log in again.'
-        : 'Failed to download ticket. Please try again later.';
+      console.error("Error downloading ticket:", error);
+      const errorMessage =
+        error.response?.status === 401
+          ? "Unauthorized: Please check your token or log in again."
+          : "Failed to download ticket. Please try again later.";
       setDownloadError(errorMessage);
     }
   };
@@ -152,16 +149,14 @@ export default function ViewTicket() {
       ? `↑ ${growth}% More`
       : `↓ ${Math.abs(growth)}% Less`;
 
-  // Filter tickets based on search input
   const filteredTickets = tickets.filter(
     (t) =>
       t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.ticketId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.ticketId.toLowerCase().includes(searchTerm.toLowerCase()) || // Use ticketId for search
       t.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.status.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Generate pagination buttons
   const renderPagination = () => {
     const totalPages = Math.ceil(totalTickets / limit);
     const pages = [];
@@ -217,14 +212,12 @@ export default function ViewTicket() {
     <div className="p-4 sm:p-6 text-gray-800">
       <h1 className="text-3xl font-semibold mb-6">Tickets</h1>
 
-      {/* Download Error Message */}
       {downloadError && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
           {downloadError}
         </div>
       )}
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {[
           { label: "Total Tickets", value: totalTickets, growth: totalTicketsGrowth },
@@ -257,7 +250,6 @@ export default function ViewTicket() {
         ))}
       </div>
 
-      {/* Search and Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
         <div>
           <h2 className="text-xl font-medium mb-1">
@@ -276,7 +268,6 @@ export default function ViewTicket() {
         </div>
       </div>
 
-      {/* Mobile Card View */}
       <div className="md:hidden grid gap-4 mb-4">
         {filteredTickets.map((t) => (
           <div
@@ -316,7 +307,6 @@ export default function ViewTicket() {
         )}
       </div>
 
-      {/* Desktop Table View */}
       <div className="hidden md:block bg-white rounded shadow p-4 text-black overflow-x-auto">
         <table className="min-w-full text-sm text-left whitespace-nowrap">
           <thead className="text-black">
@@ -332,7 +322,7 @@ export default function ViewTicket() {
             {filteredTickets.map((t) => (
               <tr key={t._id} className="hover:bg-cyan-100">
                 <td className="py-2 px-4">{t.name}</td>
-                <td className="py-2 px-4">{t.ticketId}</td>
+                <td className="py-2 px-4">{t.ticketId}</td> {/* Display ticketId */}
                 <td className="py-2 px-4">{t.category}</td>
                 <td className="py-2 px-4">
                   <span
@@ -364,15 +354,12 @@ export default function ViewTicket() {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
         <span>
-          Showing data {(page - 1) * limit + 1} to{' '}
+          Showing data {(page - 1) * limit + 1} to{" "}
           {Math.min(page * limit, totalTickets)} of {totalTickets} entries
         </span>
-        <div className="flex flex-wrap gap-1">
-          {renderPagination()}
-        </div>
+        <div className="flex flex-wrap gap-1">{renderPagination()}</div>
       </div>
     </div>
   );
