@@ -1,21 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const getStatusColor = (status) => {
-  switch (status) {
-    case 'Completed':
-      return 'bg-green-100 border-green-500 text-green-700';
-    case 'In Progress':
-      return 'bg-yellow-100 border-yellow-500 text-yellow-700';
-    case 'Not Started':
-      return 'bg-red-100 border-red-500 text-red-700';
-    case 'Uploaded':
-      return 'bg-gray-100 border-gray-500 text-gray-700';
-    default:
-      return 'bg-gray-100 border-gray-500 text-gray-700';
-  }
-};
-
 export default function Activities() {
   const [instructors, setInstructors] = useState([]);
   const [students, setStudents] = useState([]);
@@ -58,7 +43,6 @@ export default function Activities() {
           name: `${inst.instructor.firstName} ${inst.instructor.lastName}`,
           email: inst.instructor.email,
           course: inst.title,
-          status: 'Uploaded', // Assuming course creation as 'Uploaded'
         }));
 
         // Map student data
@@ -67,8 +51,6 @@ export default function Activities() {
           name: `${stud.student.firstName} ${stud.student.lastName}`,
           email: stud.student.email,
           assignment: stud.course ? stud.course.title : 'No Course Assigned',
-          status: stud.overallProgress === 100 ? 'Completed' : 
-                  stud.overallProgress > 0 ? 'In Progress' : 'Not Started',
         }));
 
         setInstructors(mappedInstructors);
@@ -99,14 +81,16 @@ export default function Activities() {
   const filteredInstructors = instructors.filter(
     (inst) =>
       inst.name.toLowerCase().includes(instructorSearch.toLowerCase()) ||
-      inst.email.toLowerCase().includes(instructorSearch.toLowerCase())
+      inst.email.toLowerCase().includes(instructorSearch.toLowerCase()) ||
+      inst.id.toLowerCase().includes(instructorSearch.toLowerCase())
   );
 
   // Filter students based on search input
   const filteredStudents = students.filter(
     (stud) =>
       stud.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-      stud.email.toLowerCase().includes(studentSearch.toLowerCase())
+      stud.email.toLowerCase().includes(studentSearch.toLowerCase()) ||
+      stud.id.toLowerCase().includes(studentSearch.toLowerCase())
   );
 
   // Generate pagination buttons
@@ -172,7 +156,7 @@ export default function Activities() {
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <input
               type="text"
-              placeholder="Search by name or email"
+              placeholder="Search by name, email, or ID"
               value={instructorSearch}
               onChange={(e) => {
                 setInstructorSearch(e.target.value);
@@ -193,12 +177,10 @@ export default function Activities() {
             <div key={inst.id} className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-base font-medium text-gray-800">{inst.name}</h3>
-                <span
-                  className={`px-2 py-1 text-xs rounded border ${getStatusColor(inst.status)}`}
-                >
-                  {inst.status}
-                </span>
               </div>
+              <p className="text-sm text-gray-600 mb-1">
+                <span className="font-semibold">ID:</span> {inst.id}
+              </p>
               <p className="text-sm text-gray-600 mb-1">
                 <span className="font-semibold">Email:</span> {inst.email}
               </p>
@@ -215,26 +197,18 @@ export default function Activities() {
             <thead>
               <tr className="text-gray-600">
                 <th className="py-2 whitespace-nowrap px-4">Users Name</th>
+                <th className="whitespace-nowrap px-4">ID</th>
                 <th className="whitespace-nowrap px-4">Email</th>
                 <th className="whitespace-nowrap px-4">Courses</th>
-                <th className="whitespace-nowrap px-4">Status</th>
               </tr>
             </thead>
             <tbody>
               {filteredInstructors.map((inst) => (
                 <tr key={inst.id}>
                   <td className="py-3 whitespace-nowrap px-4">{inst.name}</td>
+                  <td className="whitespace-nowrap px-4">{inst.id}</td>
                   <td className="whitespace-nowrap px-4">{inst.email}</td>
                   <td className="whitespace-nowrap px-4">{inst.course}</td>
-                  <td className="whitespace-nowrap px-4">
-                    <span
-                      className={`px-2 py-1 text-xs rounded border ${getStatusColor(
-                        inst.status
-                      )}`}
-                    >
-                      {inst.status}
-                    </span>
-                  </td>
                 </tr>
               ))}
             </tbody>
@@ -257,7 +231,7 @@ export default function Activities() {
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <input
               type="text"
-              placeholder="Search by name or email"
+              placeholder="Search by name, email, or ID"
               value={studentSearch}
               onChange={(e) => {
                 setStudentSearch(e.target.value);
@@ -278,12 +252,10 @@ export default function Activities() {
             <div key={stud.id} className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-base font-medium text-gray-800">{stud.name}</h3>
-                <span
-                  className={`px-2 py-1 text-xs rounded border ${getStatusColor(stud.status)}`}
-                >
-                  {stud.status}
-                </span>
               </div>
+              <p className="text-sm text-gray-600 mb-1">
+                <span className="font-semibold">ID:</span> {stud.id}
+              </p>
               <p className="text-sm text-gray-600 mb-1">
                 <span className="font-semibold">Email:</span> {stud.email}
               </p>
@@ -300,26 +272,18 @@ export default function Activities() {
             <thead>
               <tr className="text-gray-600">
                 <th className="py-2 whitespace-nowrap px-4">Users Name</th>
+                <th className="whitespace-nowrap px-4">ID</th>
                 <th className="whitespace-nowrap px-4">Email</th>
                 <th className="whitespace-nowrap px-4">Assignment</th>
-                <th className="whitespace-nowrap px-4">Status</th>
               </tr>
             </thead>
             <tbody>
               {filteredStudents.map((stud) => (
                 <tr key={stud.id}>
                   <td className="py-3 whitespace-nowrap px-4">{stud.name}</td>
+                  <td className="whitespace-nowrap px-4">{stud.id}</td>
                   <td className="whitespace-nowrap px-4">{stud.email}</td>
                   <td className="whitespace-nowrap px-4">{stud.assignment}</td>
-                  <td className="whitespace-nowrap px-4">
-                    <span
-                      className={`px-2 py-1 text-xs rounded border ${getStatusColor(
-                        stud.status
-                      )}`}
-                    >
-                      {stud.status}
-                    </span>
-                  </td>
                 </tr>
               ))}
             </tbody>

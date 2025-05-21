@@ -11,7 +11,7 @@ const ManageInstructor = () => {
     firstName: "",
     lastName: "",
     email: "",
-    password: "", // Added password field
+    password: "",
     phone: "",
     avatar: "",
     expertise: "",
@@ -26,8 +26,8 @@ const ManageInstructor = () => {
     earnings: 0,
     approved: false,
   });
-  const [error, setError] = useState(""); // For API error messages
-  const [loading, setLoading] = useState(true); // For loading state
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   // Fetch instructors on component mount
   useEffect(() => {
@@ -47,9 +47,7 @@ const ManageInstructor = () => {
           setError("Failed to fetch instructors");
         }
       } catch (err) {
-        setError(
-          err.response?.data?.message || "Error fetching instructors"
-        );
+        setError(err.response?.data?.message || "Error fetching instructors");
       } finally {
         setLoading(false);
       }
@@ -80,7 +78,6 @@ const ManageInstructor = () => {
     e.preventDefault();
     setError("");
 
-    // Basic client-side validation for password
     if (!formData.password || formData.password.length < 6) {
       setError("Password is required and must be at least 6 characters long");
       return;
@@ -90,7 +87,7 @@ const ManageInstructor = () => {
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
-      password: formData.password, // Include password in the payload
+      password: formData.password,
       phone: formData.phone,
       avatar: formData.avatar || "default_avatar.jpg",
       expertise: formData.expertise
@@ -121,7 +118,7 @@ const ManageInstructor = () => {
           firstName: "",
           lastName: "",
           email: "",
-          password: "", // Reset password field
+          password: "",
           phone: "",
           avatar: "",
           expertise: "",
@@ -140,9 +137,36 @@ const ManageInstructor = () => {
         setError("Failed to enroll instructor");
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Error enrolling instructor"
+      setError(err.response?.data?.message || "Error enrolling instructor");
+    }
+  };
+
+  // Handle instructor deletion
+  const handleDelete = async (instructorId) => {
+    if (!window.confirm("Are you sure you want to delete this instructor?")) {
+      return;
+    }
+
+    setError("");
+    try {
+      // Use production endpoint for consistency; replace with 'http://localhost:6600' if local testing is required
+      const response = await axios.delete(
+        `https://lms-backend-flwq.onrender.com/api/v1/admin/users/instructors/${instructorId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
+      if (response.data.success) {
+        setInstructors(instructors.filter((inst) => inst._id !== instructorId));
+        setSelectedInstructor(null); // Close popup
+      } else {
+        setError("Failed to delete instructor");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Error deleting instructor");
     }
   };
 
@@ -368,8 +392,7 @@ const ManageInstructor = () => {
             >
               <div className="bg-white border-2 border-blue-400 rounded-lg p-4 sm:p-6 w-11/12 sm:w-3/4 md:w-1/2 lg:w-1/3 max-h-[80vh] overflow-y-auto">
                 <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800">
-                  {`${selectedInstructor.firstName} ${selectedInstructor.lastName}`}{" "}
-                  Details
+                  {`${selectedInstructor.firstName} ${selectedInstructor.lastName}`} Details
                 </h2>
                 <div className="space-y-2 text-sm sm:text-base text-gray-600">
                   <p>
@@ -485,7 +508,13 @@ const ManageInstructor = () => {
                       : "N/A"}
                   </p>
                 </div>
-                <div className="flex justify-end mt-4">
+                <div className="flex justify-end mt-4 space-x-2">
+                  <button
+                    onClick={() => handleDelete(selectedInstructor._id)}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm sm:text-base"
+                  >
+                    Delete
+                  </button>
                   <button
                     onClick={() => setSelectedInstructor(null)}
                     className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
