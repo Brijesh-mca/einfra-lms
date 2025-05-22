@@ -12,8 +12,11 @@ import RevenuesReport from './pages/RevenueReport/RevenuesReport';
 import ManageCourses from './pages/ManageCourses';
 import ManageInstructor from './pages/ManageInstructor';
 import ManageStudent from './pages/ManageStudent';
+import CreateCourse from './components/Instructor_createCourse_component/createCourse';
+import Setting from './pages/setting';
 import { Menu } from 'lucide-react';
 import { useAuth } from './AuthContext';
+import MyCourses from './components/Instructor_myCourse_component/mycources';
 
 // Child component to ensure useAuth is called inside AuthProvider
 function AppContent() {
@@ -111,6 +114,24 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+            <Route
+            path="dashboard/create-course"
+            element={
+              <ProtectedRoute>
+               <CreateCourse />
+              </ProtectedRoute>
+            }
+          />
+
+          
+            <Route
+            path="/dashboard/my-courses"
+            element={
+              <ProtectedRoute>
+               <MyCourses />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/memberships"
             element={
@@ -127,7 +148,16 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+           <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Setting />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
+        
       </main>
     </div>
   );

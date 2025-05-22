@@ -17,6 +17,7 @@ export default function ViewTicket() {
   const [downloadError, setDownloadError] = useState(null);
 
   const token = localStorage.getItem("authToken");
+  console.log("Token:", token);
 
   useEffect(() => {
     const fetchTickets = async () => {

@@ -92,6 +92,16 @@ export default function Sidebar({ onLinkClick }) {
             <FaUserGraduate size={18} className="text-black" /> Manage Student
           </NavLink>
          
+
+          <NavLink
+            to="/dashboard/create-course"
+            onClick={handleClick}
+            className={({ isActive }) =>
+              isActive ? `${linkClass} ${activeClass}` : linkClass
+            }
+          >
+            <FaUserGraduate size={18} className="text-black" /> Create Course
+          </NavLink>
          
         </nav>
       </div>
