@@ -13,6 +13,7 @@ import ManageCourses from './pages/ManageCourses';
 import ManageInstructor from './pages/ManageInstructor';
 import ManageStudent from './pages/ManageStudent';
 import CreateCourse from './components/Instructor_createCourse_component/createCourse';
+import Contents from './components/Instructor_myCourse_component/contents_components/contents';
 import Setting from './pages/setting';
 import { Menu } from 'lucide-react';
 import { useAuth } from './AuthContext';
@@ -132,6 +133,17 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+
+             <Route
+            path="/dashboard/course-editor/:courseId"
+            element={
+              <ProtectedRoute>
+               <Contents />
+              </ProtectedRoute>
+            }
+          />
+
+          
           <Route
             path="/memberships"
             element={

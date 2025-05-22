@@ -96,13 +96,13 @@ const Contents = () => {
   // Fetch curriculum and status from backend
   const fetchCurriculum = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("Please log in to fetch curriculum.");
       }
 
       const response = await axios.get(
-        `https://lms-backend-flwq.onrender.com/api/v1/courses/${courseId}`,
+        `https://lms-backend-flwq.onrender.com/api/v1/admin/courses/${courseId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -154,7 +154,7 @@ const Contents = () => {
       if (error.response?.status === 401) {
         showNotification("Session expired or invalid. Please log in again.");
         localStorage.removeItem("token");
-        window.location.href = "/login";
+        navigate("/login");
         return;
       }
       showNotification("Failed to fetch curriculum.");
@@ -165,29 +165,31 @@ const Contents = () => {
   const addUnit = async () => {
     if (!unitName.trim()) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
+      
       const newSection = {
         sectionTitle: unitName,
         lectures: [],
       };
+      const updatedCurriculum = [
+        ...units.map((unit) => ({
+          sectionTitle: unit.name,
+          lectures: unit.topics.map((topic) => ({
+            title: topic.name,
+            description: topic.description || "",
+            duration: topic.duration || 0,
+            isPreview: topic.isPreview || false,
+            type: topic.type || "Theory",
+            resources: topic.resources || [],
+            thumbnail: topic.thumbnail || null,
+          })),
+        })),
+        newSection,
+      ];
+
       await axios.put(
         `https://lms-backend-flwq.onrender.com/api/v1/admin/courses/${courseId}`,
-        {
-          curriculum: [
-            ...units.map((unit) => ({
-              sectionTitle: unit.name,
-              lectures: unit.topics.map((topic) => ({
-                title: topic.name,
-                description: topic.description,
-                duration: topic.duration || 0,
-                isPreview: topic.isPreview || false,
-                type: topic.type || "Theory",
-                resources: topic.resources || [],
-              })),
-            })),
-            newSection,
-          ],
-        },
+        { curriculum: updatedCurriculum },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -205,7 +207,7 @@ const Contents = () => {
       if (error.response?.status === 401) {
         showNotification("Session expired or invalid. Please log in again.");
         localStorage.removeItem("token");
-        window.location.href = "/login";
+        navigate("/login");
         return;
       }
       showNotification("Failed to add section.");
@@ -216,7 +218,8 @@ const Contents = () => {
   const addTopic = async () => {
     if (!selectedUnitId || !topicName.trim()) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
+      
       const newLecture = {
         title: topicName,
         description: "",
@@ -224,6 +227,7 @@ const Contents = () => {
         isPreview: false,
         type: "Theory",
         resources: [],
+        thumbnail: null,
       };
       const updatedCurriculum = units.map((unit) => ({
         sectionTitle: unit.name,
@@ -232,25 +236,28 @@ const Contents = () => {
             ? [
                 ...unit.topics.map((topic) => ({
                   title: topic.name,
-                  description: topic.description,
+                  description: topic.description || "",
                   duration: topic.duration || 0,
                   isPreview: topic.isPreview || false,
                   type: topic.type || "Theory",
                   resources: topic.resources || [],
+                  thumbnail: topic.thumbnail || null,
                 })),
                 newLecture,
               ]
             : unit.topics.map((topic) => ({
                 title: topic.name,
-                description: topic.description,
+                description: topic.description || "",
                 duration: topic.duration || 0,
                 isPreview: topic.isPreview || false,
                 type: topic.type || "Theory",
                 resources: topic.resources || [],
+                thumbnail: topic.thumbnail || null,
               })),
       }));
+
       await axios.put(
-        `https://lms-backend-flwq.onrender.com/api/v1/instructors/courses/${courseId}`,
+        `https://lms-backend-flwq.onrender.com/api/v1/admin/courses/${courseId}`,
         { curriculum: updatedCurriculum },
         {
           headers: {
@@ -268,7 +275,7 @@ const Contents = () => {
       if (error.response?.status === 401) {
         showNotification("Session expired or invalid. Please log in again.");
         localStorage.removeItem("token");
-        window.location.href = "/login";
+        navigate("/login");
         return;
       }
       showNotification("Failed to add lecture.");
@@ -278,22 +285,25 @@ const Contents = () => {
   // Delete a unit
   const deleteUnit = async (unitId) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
+      
       const updatedCurriculum = units
         .filter((unit) => unit.id !== unitId)
         .map((unit) => ({
           sectionTitle: unit.name,
           lectures: unit.topics.map((topic) => ({
             title: topic.name,
-            description: topic.description,
+            description: topic.description || "",
             duration: topic.duration || 0,
             isPreview: topic.isPreview || false,
             type: topic.type || "Theory",
             resources: topic.resources || [],
+            thumbnail: topic.thumbnail || null,
           })),
         }));
+
       await axios.put(
-        `https://lms-backend-flwq.onrender.com/api/v1/instructors/courses/${courseId}`,
+        `https://lms-backend-flwq.onrender.com/api/v1/admin/courses/${courseId}`,
         { curriculum: updatedCurriculum },
         {
           headers: {
@@ -301,6 +311,7 @@ const Contents = () => {
           },
         }
       );
+
       setUnits((prev) => prev.filter((unit) => unit.id !== unitId));
       if (selectedUnitId === unitId) {
         setSelectedUnitId(null);
@@ -312,7 +323,7 @@ const Contents = () => {
       if (error.response?.status === 401) {
         showNotification("Session expired or invalid. Please log in again.");
         localStorage.removeItem("token");
-        window.location.href = "/login";
+        navigate("/login");
         return;
       }
       showNotification("Failed to delete section.");
@@ -322,7 +333,8 @@ const Contents = () => {
   // Delete a lecture
   const deleteTopic = async (unitId, topicId) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
+      
       const updatedCurriculum = units.map((unit) => ({
         sectionTitle: unit.name,
         lectures:
@@ -331,23 +343,26 @@ const Contents = () => {
                 .filter((topic) => topic.id !== topicId)
                 .map((topic) => ({
                   title: topic.name,
-                  description: topic.description,
+                  description: topic.description || "",
                   duration: topic.duration || 0,
                   isPreview: topic.isPreview || false,
                   type: topic.type || "Theory",
                   resources: topic.resources || [],
+                  thumbnail: topic.thumbnail || null,
                 }))
             : unit.topics.map((topic) => ({
                 title: topic.name,
-                description: topic.description,
+                description: topic.description || "",
                 duration: topic.duration || 0,
                 isPreview: topic.isPreview || false,
                 type: topic.type || "Theory",
                 resources: topic.resources || [],
+                thumbnail: topic.thumbnail || null,
               })),
       }));
+
       await axios.put(
-        `https://lms-backend-flwq.onrender.com/api/v1/instructors/courses/${courseId}`,
+        `https://lms-backend-flwq.onrender.com/api/v1/admin/courses/${courseId}`,
         { curriculum: updatedCurriculum },
         {
           headers: {
@@ -355,6 +370,7 @@ const Contents = () => {
           },
         }
       );
+
       setUnits((prev) =>
         prev.map((unit) =>
           unit.id === unitId
@@ -374,7 +390,7 @@ const Contents = () => {
       if (error.response?.status === 401) {
         showNotification("Session expired or invalid. Please log in again.");
         localStorage.removeItem("token");
-        window.location.href = "/login";
+        navigate("/login");
         return;
       }
       showNotification("Failed to delete lecture.");
@@ -384,6 +400,49 @@ const Contents = () => {
   // Update topic (lecture) details
   const updateTopic = async (unitId, topicId, updatedData) => {
     try {
+      const token = localStorage.getItem("authToken");
+      
+      const updatedCurriculum = units.map((unit) => ({
+        sectionTitle: unit.name,
+        lectures: unit.topics.map((topic) => ({
+          title: topic.id === topicId && unit.id === unitId ? updatedData.name || topic.name : topic.name,
+          description:
+            topic.id === topicId && unit.id === unitId
+              ? updatedData.description || topic.description
+              : topic.description || "",
+          duration:
+            topic.id === topicId && unit.id === unitId
+              ? updatedData.duration || topic.duration
+              : topic.duration || 0,
+          isPreview:
+            topic.id === topicId && unit.id === unitId
+              ? updatedData.isPreview ?? topic.isPreview
+              : topic.isPreview || false,
+          type:
+            topic.id === topicId && unit.id === unitId
+              ? updatedData.type || topic.type
+              : topic.type || "Theory",
+          resources:
+            topic.id === topicId && unit.id === unitId
+              ? updatedData.resources || topic.resources
+              : topic.resources || [],
+          thumbnail:
+            topic.id === topicId && unit.id === unitId
+              ? updatedData.thumbnail || topic.thumbnail
+              : topic.thumbnail || null,
+        })),
+      }));
+
+      await axios.put(
+        `https://lms-backend-flwq.onrender.com/api/v1/admin/courses/${courseId}`,
+        { curriculum: updatedCurriculum },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       setUnits((prev) =>
         prev.map((unit) =>
           unit.id === unitId
@@ -398,8 +457,14 @@ const Contents = () => {
       );
       showNotification("Lecture updated successfully!", "success");
     } catch (error) {
-      console.error("Error updating lecture locally:", error);
-      showNotification("Failed to update lecture locally.");
+      console.error("Error updating lecture:", error);
+      if (error.response?.status === 401) {
+        showNotification("Session expired or invalid. Please log in again.");
+        localStorage.removeItem("token");
+        navigate("/login");
+        return;
+      }
+      showNotification("Failed to update lecture.");
     }
   };
 
@@ -407,9 +472,10 @@ const Contents = () => {
   const handleUpdateTitle = async () => {
     if (!newCourseTitle.trim()) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
+      
       await axios.put(
-        `https://lms-backend-flwq.onrender.com/api/v1/instructors/courses/${courseId}`,
+        `https://lms-backend-flwq.onrender.com/api/v1/admin/courses/${courseId}`,
         { title: newCourseTitle },
         {
           headers: {
@@ -426,7 +492,7 @@ const Contents = () => {
       if (error.response?.status === 401) {
         showNotification("Session expired or invalid. Please log in again.");
         localStorage.removeItem("token");
-        window.location.href = "/login";
+        navigate("/login");
         return;
       }
       showNotification("Failed to update course title.");
@@ -437,9 +503,10 @@ const Contents = () => {
   const handleStatusChange = async (e) => {
     const newStatus = e.target.value;
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
+      
       await axios.put(
-        `https://lms-backend-flwq.onrender.com/api/v1/instructors/courses/${courseId}`,
+        `https://lms-backend-flwq.onrender.com/api/v1/admin/courses/${courseId}`,
         { status: newStatus },
         {
           headers: {
@@ -454,7 +521,7 @@ const Contents = () => {
       if (error.response?.status === 401) {
         showNotification("Session expired or invalid. Please log in again.");
         localStorage.removeItem("token");
-        window.location.href = "/login";
+        navigate("/login");
         return;
       }
       showNotification("Failed to update course status.");

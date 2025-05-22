@@ -85,7 +85,7 @@ function CreateCourse() {
   return (
     <div className="min-h-screen bg-gray-50 px-4 sm:px-6 md:px-10 py-[5px]">
       {/* Cover Image Upload */}
-      <div className="relative w-full h-48 sm:h-60 bg-gray-200 rounded-xl overflow-hidden flex items-center justify-center">
+      {/* <div className="relative w-full h-48 sm:h-60 bg-gray-200 rounded-xl overflow-hidden flex items-center justify-center">
         {coverImage ? (
           <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
         ) : (
@@ -95,7 +95,7 @@ function CreateCourse() {
           Upload cover
           <input type="file" onChange={handleCoverChange} className="hidden" accept="image/*" />
         </label>
-      </div>
+      </div> */}
 
       {/* Course Form Container */}
       <div className="w-full mx-auto bg-white p-4 sm:p-6 rounded-xl shadow-md">

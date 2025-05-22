@@ -1,30 +1,69 @@
-import React, { useRef, useState } from "react";
-import { instructorsWithCourses } from "../data/courses";
+import React, { useRef, useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
+import { FaPlay } from "react-icons/fa";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 // Course Card Component
-const CourseCard = ({ course, onCourseClick }) => (
-  <div className="bg-gray-50 shadow-lg p-5 rounded-xl w-80 flex-shrink-0">
-    <div className="relative m-2 shadow-lg">
-      <img
-        src={course.image}
-        alt={course.title}
-        className="rounded-t-xl h-36 w-full object-cover cursor-pointer"
-        onClick={() => onCourseClick(course)}
-      />
-      <div className="absolute top-2 right-2 bg-cyan-500 text-white text-xs px-2 py-1 rounded-full">
-        ★ {course.rating}
-      </div>
+const CourseCard = ({ course, onCourseClick, onPlay }) => (
+  <div
+    key={course._id}
+    className="bg-gray-50 p-4 rounded-xl shadow-lg w-80 flex-shrink-0 relative transition-transform transform hover:scale-105 cursor-pointer"
+    onClick={() => onCourseClick(course._id, course.title)}
+  >
+    {/* Thumbnail container with fixed height */}
+    <div className="relative w-full h-36 bg-gray-200 rounded-md mb-3">
+      {course.thumbnail ? (
+        <img
+          src={course.thumbnail}
+          alt={course.title}
+          className="w-full h-full object-cover rounded-md"
+        />
+      ) : (
+        <div className="w-full h-full bg-gray-300 flex items-center justify-center rounded-md">
+          <span className="text-gray-500">No Thumbnail</span>
+        </div>
+      )}
+      {/* Play button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent card click event
+          onPlay(course._id);
+        }}
+        className="absolute -bottom-4 right-0 bg-cyan-500 text-white p-3 rounded-full shadow-lg hover:scale-120 cursor-pointer z-50"
+        title="Play Course"
+      >
+        <FaPlay />
+      </button>
     </div>
-    <div className="p-3">
-      <h4 className="font-semibold text-center text-sm">{course.title}</h4>
-      <p className="text-center text-xs text-gray-500">{course.lessons} lessons</p>
+
+    <h3 className="text-sm font-semibold text-center text-slate-800 mb-1 truncate">
+      {course.title}
+    </h3>
+    <p className="text-xs text-center text-gray-500 mb-2 truncate">
+      {course.description || "No description available"}
+    </p>
+
+    <div className="flex justify-between items-center">
+      <span className="text-sm font-semibold text-slate-700">
+        ₹{course.discountPrice ?? course.price}
+      </span>
+      {course.discountPrice && (
+        <span className="text-xs text-gray-500 line-through">₹{course.price}</span>
+      )}
+    </div>
+
+    <div className="flex justify-between items-center mt-3">
+      <span className="text-xs text-gray-700">
+        👨‍🎓 {course.totalStudents || 0} Students
+      </span>
+      <span className="text-xs text-yellow-500">⭐ {course.rating || "N/A"}</span>
     </div>
   </div>
 );
 
 // Instructor Row with Scroll Control
-const InstructorRow = ({ instructor, onCourseClick }) => {
+const InstructorRow = ({ instructor, onCourseClick, onPlay }) => {
   const scrollRef = useRef();
 
   const scrollRight = () => {
@@ -46,14 +85,19 @@ const InstructorRow = ({ instructor, onCourseClick }) => {
   return (
     <div className="mb-10 bg-white shadow-lg rounded-xl p-4">
       <h3 className="text-lg font-medium mb-3">{instructor.name}</h3>
-      <div className="relative overflow-hidden ">
+      <div className="relative overflow-hidden">
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto no-scrollbar space-x-4 pr-4 "
+          className="flex overflow-x-auto no-scrollbar space-x-4 pr-4"
           style={{ scrollBehavior: "smooth", overflowY: "hidden" }}
         >
           {instructor.courses.map((course) => (
-            <CourseCard key={course.id} course={course} onCourseClick={onCourseClick} />
+            <CourseCard
+              key={course._id}
+              course={course}
+              onCourseClick={onCourseClick}
+              onPlay={onPlay}
+            />
           ))}
         </div>
 
@@ -81,111 +125,109 @@ const InstructorRow = ({ instructor, onCourseClick }) => {
   );
 };
 
-// Modal Component for Course Details and Editing
-const CourseModal = ({ course, onClose, onSave }) => {
-  const [formData, setFormData] = useState({
-    title: course.title,
-    lessons: course.lessons,
-    rating: course.rating,
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave({ ...course, ...formData });
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
-        <h3 className="text-lg font-semibold mb-4">Edit Course Details</h3>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Course Title</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Lessons</label>
-            <input
-              type="number"
-              name="lessons"
-              value={formData.lessons}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              min="1"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
-            <input
-              type="number"
-              name="rating"
-              value={formData.rating}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              min="0"
-              max="5"
-              step="0.1"
-              required
-            />
-          </div>
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-white bg-cyan-500 rounded-md hover:bg-cyan-600 transition-colors"
-            >
-              Save
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
 // Main Page
 const AllCoursesPage = () => {
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [coursesData, setCoursesData] = useState(instructorsWithCourses);
+  const [coursesData, setCoursesData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  const handleCourseClick = (course) => {
-    setSelectedCourse(course);
+  // Retrieve Bearer token from localStorage
+  const token = localStorage.getItem("authToken");
+
+  // Fetch instructors and their courses using Axios
+  useEffect(() => {
+    const fetchInstructorsAndCourses = async () => {
+      if (!token) {
+        setError("Please log in to view courses.");
+        setLoading(false);
+        navigate("/login");
+        return;
+      }
+
+      try {
+        // Fetch all instructors
+        const instructorsResponse = await axios.get(
+          "https://lms-backend-flwq.onrender.com/api/v1/admin/users/instructors",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const instructors = instructorsResponse.data.data || [];
+
+        // Fetch courses for each instructor
+        const instructorsWithCourses = await Promise.all(
+          instructors.map(async (instructor) => {
+            try {
+              const coursesResponse = await axios.get(
+                `https://lms-backend-flwq.onrender.com/api/v1/admin/instructors/${instructor._id}/courses`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+              return {
+                id: instructor._id,
+                name: `${instructor.firstName} ${instructor.lastName}`,
+                courses: coursesResponse.data.data.courses.map((course) => ({
+                  ...course,
+                  _id: course._id,
+                  title: course.title,
+                  description: course.description,
+                  price: course.price,
+                  discountPrice: course.discountPrice || null,
+                  totalStudents: course.totalStudents || 0,
+                  rating: course.rating || 0,
+                  thumbnail: course.thumbnail || null,
+                })),
+              };
+            } catch (courseError) {
+              console.error(
+                `Failed to fetch courses for instructor ${instructor._id}:`,
+                courseError
+              );
+              return {
+                id: instructor._id,
+                name: `${instructor.firstName} ${instructor.lastName}`,
+                courses: [],
+              };
+            }
+          })
+        );
+
+        setCoursesData(instructorsWithCourses);
+        setLoading(false);
+      } catch (err) {
+        setError(err.response?.data?.message || "Failed to fetch instructors");
+        setLoading(false);
+        if (err.response?.status === 401) {
+          navigate("/login");
+        }
+      }
+    };
+
+    fetchInstructorsAndCourses();
+  }, [navigate, token]);
+
+  const handleCourseClick = (courseId, courseTitle) => {
+    navigate(`/dashboard/course-editor/${courseId}`, { state: { courseTitle } });
   };
 
-  const handleSaveCourse = (updatedCourse) => {
-    // Update the courses data (simulated, no backend)
-    const updatedData = coursesData.map((instructor) => ({
-      ...instructor,
-      courses: instructor.courses.map((c) =>
-        c.id === updatedCourse.id ? { ...c, ...updatedCourse } : c
-      ),
-    }));
-    setCoursesData(updatedData);
+  const handlePlay = (courseId) => {
+    // Implement play functionality (e.g., redirect to course player or log)
+    console.log(`Playing course with ID: ${courseId}`);
   };
 
-  const handleCloseModal = () => {
-    setSelectedCourse(null);
-  };
+  if (loading) {
+    return <div className="p-4 bg-gray-50 m-3 min-h-screen">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="p-4 bg-gray-50 m-3 min-h-screen">Error: {error}</div>;
+  }
 
   return (
     <div className="p-4 bg-gray-50 m-3 min-h-screen overflow-x-hidden">
@@ -195,15 +237,9 @@ const AllCoursesPage = () => {
           key={instructor.id}
           instructor={instructor}
           onCourseClick={handleCourseClick}
+          onPlay={handlePlay}
         />
       ))}
-      {selectedCourse && (
-        <CourseModal
-          course={selectedCourse}
-          onClose={handleCloseModal}
-          onSave={handleSaveCourse}
-        />
-      )}
     </div>
   );
 };
