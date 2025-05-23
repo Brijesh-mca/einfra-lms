@@ -147,12 +147,14 @@ export default function Activities() {
 
   return (
     <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans">
-      <h1 className="text-2xl md:text-4xl font-bold mb-6 md:mb-8">Activities</h1>
+     <h1 className="text-2xl md:text-4xl font-bold mb-6 md:mb-8 mt-10 text-center md:text-left">
+  Activities
+</h1>
 
       {/* Instructors Section */}
       <section className="bg-white p-4 md:p-6 rounded-2xl shadow mb-8 md:mb-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-          <h2 className="text-lg md:text-xl font-semibold">Instructors</h2>
+          <h2 className="text-lg md:text-xl font-semibold text-cyan-600">Instructors</h2>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <input
               type="text"
@@ -227,7 +229,7 @@ export default function Activities() {
       {/* Students Section */}
       <section className="bg-white p-4 md:p-6 rounded-2xl shadow">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-          <h2 className="text-lg md:text-xl font-semibold text-teal-600">Active Members</h2>
+          <h2 className="text-lg md:text-xl font-semibold text-cyan-600">Students</h2>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <input
               type="text"

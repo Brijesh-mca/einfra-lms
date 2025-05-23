@@ -15,7 +15,7 @@ import { useAuth } from '../AuthContext';
 export default function Sidebar({ onLinkClick }) {
   const { user, logout } = useAuth();
   const linkClass =
-    'flex items-center gap-3 p-2 rounded-md text-gray-700 hover:bg-gray-200 transition-colors duration-200 ease-in-out';
+    'flex items-center gap-3 p-2 rounded-md text-black hover:bg-gray-200 transition-colors duration-200 ease-in-out';
   const activeClass = 'text-black font-semibold';
 
   const handleClick = () => {

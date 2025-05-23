@@ -211,7 +211,7 @@ export default function ViewTicket() {
 
   return (
     <div className="p-4 sm:p-6 text-gray-800">
-      <h1 className="text-3xl font-semibold mb-6">Tickets</h1>
+      <h1 className="text-3xl font-semibold mb-6 text-center md:text-left">Tickets</h1>
 
       {downloadError && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">

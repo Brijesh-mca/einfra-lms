@@ -3,7 +3,7 @@ import axios from "axios";
 import { useAuth } from "../AuthContext"; // Adjust path as per your project structure
 
 const ManageInstructor = () => {
-  const { token } = useAuth(); // Get token from AuthContext
+  const { token } = useAuth();
   const [instructors, setInstructors] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
@@ -28,6 +28,7 @@ const ManageInstructor = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [toggleLoading, setToggleLoading] = useState({});
 
   // Fetch instructors on component mount
   useEffect(() => {
@@ -36,9 +37,8 @@ const ManageInstructor = () => {
         const response = await axios.get(
           "https://lms-backend-flwq.onrender.com/api/v1/admin/users/instructors",
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 10000,
           }
         );
         if (response.data.success) {
@@ -109,6 +109,7 @@ const ManageInstructor = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          timeout: 10000,
         }
       );
       if (response.data.success) {
@@ -141,32 +142,49 @@ const ManageInstructor = () => {
     }
   };
 
-  // Handle instructor deletion
-  const handleDelete = async (instructorId) => {
-    if (!window.confirm("Are you sure you want to delete this instructor?")) {
-      return;
-    }
+  const handleToggleStatus = async (instructorId) => {
+    const instructor = instructors.find((i) => i._id === instructorId);
+    if (!instructor) return setError("Instructor not found");
 
+    const newStatus = !instructor.isActive;
+    setToggleLoading((prev) => ({ ...prev, [instructorId]: true }));
     setError("");
+
     try {
-      // Use production endpoint for consistency; replace with 'http://localhost:6600' if local testing is required
-      const response = await axios.delete(
-        `https://lms-backend-flwq.onrender.com/api/v1/admin/users/instructors/${instructorId}`,
+      const response = await axios.patch(
+        `https://lms-backend-flwq.onrender.com/api/v1/admin/users/instructors/${instructorId}/toggle-active`,
+        { isActive: newStatus },
         {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          timeout: 10000,
         }
       );
+
       if (response.data.success) {
-        setInstructors(instructors.filter((inst) => inst._id !== instructorId));
-        setSelectedInstructor(null); // Close popup
+        setInstructors(
+          instructors.map((instructor) =>
+            instructor._id === instructorId
+              ? { ...instructor, isActive: response.data.data.isActive }
+              : instructor
+          )
+        );
+        if (selectedInstructor && selectedInstructor._id === instructorId) {
+          setSelectedInstructor({
+            ...selectedInstructor,
+            isActive: response.data.data.isActive,
+          });
+        }
       } else {
-        setError("Failed to delete instructor");
+        setError("Failed to toggle instructor status: " + response.data.message);
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Error deleting instructor");
+      const errorMessage = err.response?.data?.message || err.message;
+      setError(`Error toggling instructor status: ${errorMessage}`);
+    } finally {
+      setToggleLoading((prev) => ({ ...prev, [instructorId]: false }));
     }
   };
 
@@ -184,8 +202,8 @@ const ManageInstructor = () => {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+      <div className="flex justify-between items-center mb-6 mt-10">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left">
           Manage Instructors
         </h1>
         <button
@@ -374,7 +392,7 @@ const ManageInstructor = () => {
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 card-bg text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
                     >
                       Enroll
                     </button>
@@ -395,18 +413,10 @@ const ManageInstructor = () => {
                   {`${selectedInstructor.firstName} ${selectedInstructor.lastName}`} Details
                 </h2>
                 <div className="space-y-2 text-sm sm:text-base text-gray-600">
-                  <p>
-                    <strong>First Name:</strong> {selectedInstructor.firstName}
-                  </p>
-                  <p>
-                    <strong>Last Name:</strong> {selectedInstructor.lastName}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {selectedInstructor.email}
-                  </p>
-                  <p>
-                    <strong>Phone:</strong> {selectedInstructor.phone}
-                  </p>
+                  <p><strong>First Name:</strong> {selectedInstructor.firstName}</p>
+                  <p><strong>Last Name:</strong> {selectedInstructor.lastName}</p>
+                  <p><strong>Email:</strong> {selectedInstructor.email}</p>
+                  <p><strong>Phone:</strong> {selectedInstructor.phone || "N/A"}</p>
                   <p>
                     <strong>Avatar:</strong>{" "}
                     {selectedInstructor.avatar ? (
@@ -424,13 +434,8 @@ const ManageInstructor = () => {
                     <strong>Expertise:</strong>{" "}
                     {selectedInstructor.expertise?.join(", ") || "N/A"}
                   </p>
-                  <p>
-                    <strong>Total Courses:</strong>{" "}
-                    {selectedInstructor.totalCourses}
-                  </p>
-                  <p>
-                    <strong>Bio:</strong> {selectedInstructor.bio || "N/A"}
-                  </p>
+                  <p><strong>Total Courses:</strong> {selectedInstructor.totalCourses}</p>
+                  <p><strong>Bio:</strong> {selectedInstructor.bio || "N/A"}</p>
                   <p>
                     <strong>Social:</strong>{" "}
                     {selectedInstructor.socialLinks ? (
@@ -472,27 +477,12 @@ const ManageInstructor = () => {
                       {selectedInstructor.isActive ? "Active" : "Inactive"}
                     </span>
                   </p>
-                  <p>
-                    <strong>Role:</strong> {selectedInstructor.role}
-                  </p>
-                  <p>
-                    <strong>Verified:</strong>{" "}
-                    {selectedInstructor.isVerified ? "Yes" : "No"}
-                  </p>
-                  <p>
-                    <strong>Rating:</strong> {selectedInstructor.rating}
-                  </p>
-                  <p>
-                    <strong>Total Students:</strong>{" "}
-                    {selectedInstructor.totalStudents}
-                  </p>
-                  <p>
-                    <strong>Earnings:</strong> ${selectedInstructor.earnings}
-                  </p>
-                  <p>
-                    <strong>Approved:</strong>{" "}
-                    {selectedInstructor.approved ? "Yes" : "No"}
-                  </p>
+                  <p><strong>Role:</strong> {selectedInstructor.role}</p>
+                  <p><strong>Verified:</strong> {selectedInstructor.isVerified ? "Yes" : "No"}</p>
+                  <p><strong>Rating:</strong> {selectedInstructor.rating}</p>
+                  <p><strong>Total Students:</strong> {selectedInstructor.totalStudents}</p>
+                  <p><strong>Earnings:</strong> ${selectedInstructor.earnings}</p>
+                  <p><strong>Approved:</strong> {selectedInstructor.approved ? "Yes" : "No"}</p>
                   <p>
                     <strong>Created At:</strong>{" "}
                     {new Date(selectedInstructor.createdAt).toLocaleString()}
@@ -510,10 +500,19 @@ const ManageInstructor = () => {
                 </div>
                 <div className="flex justify-end mt-4 space-x-2">
                   <button
-                    onClick={() => handleDelete(selectedInstructor._id)}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm sm:text-base"
+                    onClick={() => handleToggleStatus(selectedInstructor._id)}
+                    disabled={toggleLoading[selectedInstructor._id]}
+                    className={`px-4 py-2 text-white rounded-lg text-sm sm:text-base ${
+                      selectedInstructor.isActive
+                        ? "bg-red-600 hover:bg-red-700"
+                        : "bg-green-600 hover:bg-green-700"
+                    } ${toggleLoading[selectedInstructor._id] ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
-                    Delete
+                    {toggleLoading[selectedInstructor._id]
+                      ? "Loading..."
+                      : selectedInstructor.isActive
+                      ? "Deactivate"
+                      : "Activate"}
                   </button>
                   <button
                     onClick={() => setSelectedInstructor(null)}
@@ -577,7 +576,7 @@ const ManageInstructor = () => {
                         {instructor.email}
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                        {instructor.phone}
+                        {instructor.phone || "N/A"}
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
                         {instructor.expertise?.join(", ") || "N/A"}
@@ -642,23 +641,17 @@ const ManageInstructor = () => {
                   </div>
                 </div>
                 <div className="space-y-2 text-sm text-gray-600">
-                  <p>
-                    <strong>Email:</strong> {instructor.email}
-                  </p>
-                  <p>
-                    <strong>Phone:</strong> {instructor.phone}
-                  </p>
+                  <p><strong>Email:</strong> {instructor.email}</p>
+                  <p><strong>Phone:</strong> {instructor.phone || "N/A"}</p>
                   <p>
                     <strong>Expertise:</strong>{" "}
                     {instructor.expertise?.join(", ") || "N/A"}
                   </p>
-                  <p>
-                    <strong>Courses:</strong> {instructor.totalCourses}
-                  </p>
+                  <p><strong>Courses:</strong> {instructor.totalCourses}</p>
                   <div className="mt-3">
                     <button
                       onClick={() => openDetailsPopup(instructor)}
-                      className="card-bg text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                      className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
                     >
                       More
                     </button>

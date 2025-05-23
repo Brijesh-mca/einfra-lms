@@ -230,8 +230,8 @@ const AllCoursesPage = () => {
   }
 
   return (
-    <div className="p-4 bg-gray-50 m-3 min-h-screen overflow-x-hidden">
-      <h2 className="text-2xl font-semibold mb-6">All Courses</h2>
+    <div className="p-4 bg-gray-50 mt-5 min-h-screen overflow-x-hidden">
+      <h2 className="text-2xl font-semibold mb-6 text-center md:text-left">All Courses</h2>
       {coursesData.map((instructor) => (
         <InstructorRow
           key={instructor.id}

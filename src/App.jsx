@@ -13,11 +13,11 @@ import ManageCourses from './pages/ManageCourses';
 import ManageInstructor from './pages/ManageInstructor';
 import ManageStudent from './pages/ManageStudent';
 import CreateCourse from './components/Instructor_createCourse_component/createCourse';
-import Contents from './components/Instructor_myCourse_component/contents_components/contents';
+import CourseEditor from './components/Instructor_createCourse_component/courseEditor';
 import Setting from './pages/setting';
 import { Menu } from 'lucide-react';
 import { useAuth } from './AuthContext';
-import MyCourses from './components/Instructor_myCourse_component/mycources';
+
 
 // Child component to ensure useAuth is called inside AuthProvider
 function AppContent() {
@@ -30,7 +30,7 @@ function AppContent() {
   const showSidebar = isAuthenticated && !isLoginPage;
 
   return (
-    <div className="min-h-screen flex bg-gray-50 mt-7">
+    <div className="min-h-screen flex bg-gray-50 ">
       {/* Sidebar - Fixed on all screen sizes, only shown when authenticated and not on login page */}
       {showSidebar && (
         <>
@@ -64,7 +64,7 @@ function AppContent() {
       )}
 
       {/* Main Content - Adjust margin based on sidebar visibility */}
-      <main className={`flex-1 ${showSidebar ? 'lg:ml-64' : 'ml-0'} p-4 overflow-x-auto`}>
+      <main className={`flex-1 ${showSidebar ? 'lg:ml-64' : 'ml-0'}  overflow-x-auto`}>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route
@@ -125,20 +125,13 @@ function AppContent() {
           />
 
           
-            <Route
-            path="/dashboard/my-courses"
-            element={
-              <ProtectedRoute>
-               <MyCourses />
-              </ProtectedRoute>
-            }
-          />
+        
 
              <Route
             path="/dashboard/course-editor/:courseId"
             element={
               <ProtectedRoute>
-               <Contents />
+               <CourseEditor />
               </ProtectedRoute>
             }
           />

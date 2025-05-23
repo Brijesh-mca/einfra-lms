@@ -232,7 +232,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className="p-6 mt-5 space-y-6 bg-gray-50 min-h-screen">
       {/* Info Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InfoCard

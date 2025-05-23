@@ -21,13 +21,15 @@ const Memberships = () => {
 
         console.log("Fetching memberships from /analytics/enrollments");
         const response = await axiosInstance.get("/analytics/enrollments");
-        console.log("Memberships response:", response.data);
+        // console.log("Memberships response:", response.data);
 
-        // Map response data to match UI needs
+        // Map response data to include only specified fields
         const mappedMemberships = response.data.data.map((enrollment) => ({
           id: enrollment._id,
-          course: enrollment.courseTitle,
-          totalEnrollments: enrollment.totalEnrollments,
+          studentName: enrollment.studentName,
+          studentId: enrollment.studentId,
+          studentEmail: enrollment.studentEmail,
+          courseTitle: enrollment.courseTitle,
         }));
 
         setMemberships(mappedMemberships);
@@ -77,23 +79,27 @@ const Memberships = () => {
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-100">
-              <th className="p-4 text-left text-sm font-semibold text-gray-700">ID</th>
-              <th className="p-4 text-left text-sm font-semibold text-gray-700">Course</th>
-              <th className="p-4 text-left text-sm font-semibold text-gray-700">Total Enrollments</th>
+              
+              <th className="p-4 text-left text-sm font-semibold text-gray-700">Student Name</th>
+              <th className="p-4 text-left text-sm font-semibold text-gray-700">Student ID</th>
+              <th className="p-4 text-left text-sm font-semibold text-gray-700">Student Email</th>
+              <th className="p-4 text-left text-sm font-semibold text-gray-700">Course Title</th>
             </tr>
           </thead>
           <tbody>
             {memberships.length > 0 ? (
               memberships.map((membership) => (
                 <tr key={membership.id} className="border-b hover:bg-gray-50">
-                  <td className="p-4 text-gray-800">{membership.id || "N/A"}</td>
-                  <td className="p-4 text-gray-800">{membership.course || "N/A"}</td>
-                  <td className="p-4 text-gray-800">{membership.totalEnrollments || 0}</td>
+                  
+                  <td className="p-4 text-gray-800">{membership.studentName || "N/A"}</td>
+                  <td className="p-4 text-gray-800">{membership.studentId || "N/A"}</td>
+                  <td className="p-4 text-gray-800">{membership.studentEmail || "N/A"}</td>
+                  <td className="p-4 text-gray-800">{membership.courseTitle || "N/A"}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="3" className="p-4 text-center text-gray-500">
+                <td colSpan="5" className="p-4 text-center text-gray-500">
                   No enrollments found
                 </td>
               </tr>
@@ -111,14 +117,22 @@ const Memberships = () => {
               className="p-6 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow"
             >
               <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                {membership.course || "N/A"}
+                {membership.courseTitle || "N/A"}
               </h2>
               <p className="text-gray-600 mb-2">
                 <span className="font-bold">ID:</span> {membership.id || "N/A"}
               </p>
               <p className="text-gray-600 mb-2">
-                <span className="font-bold">Total Enrollments:</span>{" "}
-                {membership.totalEnrollments || 0}
+                <span className="font-bold">Student Name:</span>{" "}
+                {membership.studentName || "N/A"}
+              </p>
+              <p className="text-gray-600 mb-2">
+                <span className="font-bold">Student ID:</span>{" "}
+                {membership.studentId || "N/A"}
+              </p>
+              <p className="text-gray-600 mb-2">
+                <span className="font-bold">Student Email:</span>{" "}
+                {membership.studentEmail || "N/A"}
               </p>
             </div>
           ))

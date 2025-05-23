@@ -23,7 +23,7 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="bg-black text-white rounded-xl shadow-md p-6 w-full max-w-md">
-        <h1 className="text-2xl font-bold text-cyan-500 mb-6 text-center">LMS Login</h1>
+        <h1 className="text-2xl font-bold text-cyan-500 mb-6 text-center">ADMIN Login</h1>
         {error && (
           <div className="bg-red-100 text-red-700 p-2 rounded-md mb-4 text-sm">
             {error}
