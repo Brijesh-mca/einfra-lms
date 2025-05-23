@@ -29,6 +29,11 @@ function AppContent() {
   const isLoginPage = location.pathname === '/login';
   const showSidebar = isAuthenticated && !isLoginPage;
 
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   // Handle scroll to show/hide menu button
   useEffect(() => {
     let scrollTimeout;
