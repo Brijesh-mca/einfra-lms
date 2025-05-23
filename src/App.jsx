@@ -80,7 +80,7 @@ function AppContent() {
           {!sidebarOpen && showMenuButton && (
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden fixed top-4 right-4 z-50 p-2 bg-white rounded shadow-md"
+              className="lg:hidden fixed top-4 right-1 z-50 p-2 bg-white rounded shadow-md"
             >
               <Menu />
             </button>
