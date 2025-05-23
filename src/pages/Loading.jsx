@@ -1,5 +1,5 @@
 import React from 'react';
-import './index.css'; // Ensure your stylesheet is imported if keyframes are defined there
+
 
 export default function Loading() {
   return (
@@ -7,7 +7,7 @@ export default function Loading() {
       <div className="flex flex-col items-center gap-8">
         {/* LMS Logo with Fade and Scale Animation */}
         <div className="text-4xl font-bold text-cyan-500 animate-glow-pulse">
-          LMS
+          ADMIN
         </div>
         {/* Central Ball with Orbiting Particles */}
         <div className="relative w-24 h-24">
