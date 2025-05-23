@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../AuthContext"; // Adjust path as per your project structure
+import Loading from "./Loading";
 
 const ManageInstructor = () => {
   const { token } = useAuth();
@@ -208,7 +209,7 @@ const ManageInstructor = () => {
         </h1>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="card-bg text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+          className="card-bg text-white shadow shadow-black px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
         >
           Enroll Instructor
         </button>
@@ -223,7 +224,7 @@ const ManageInstructor = () => {
 
       {/* Loading State */}
       {loading ? (
-        <div className="text-center text-gray-600">Loading instructors...</div>
+        <Loading />
       ) : instructors.length === 0 ? (
         <div className="text-center text-gray-600">No instructors found.</div>
       ) : (
@@ -598,7 +599,7 @@ const ManageInstructor = () => {
                       <td className="py-4 px-6 text-sm">
                         <button
                           onClick={() => openDetailsPopup(instructor)}
-                          className="card-bg text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                          className="card-bg shadow shadow-black text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
                         >
                           More
                         </button>
@@ -651,7 +652,7 @@ const ManageInstructor = () => {
                   <div className="mt-3">
                     <button
                       onClick={() => openDetailsPopup(instructor)}
-                      className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                      className="shadow shadow-black card-bg text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
                     >
                       More
                     </button>

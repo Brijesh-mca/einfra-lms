@@ -123,7 +123,7 @@ function GeneralInfo({ state, dispatch, onPreview }) {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 md:space-y-8 mt-4 sm:mt-6">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8 mt-10 sm:mt-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
           <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
@@ -374,14 +374,14 @@ function GeneralInfo({ state, dispatch, onPreview }) {
           onClick={handleSave}
           disabled={loading || instructorLoading}
           aria-label={loading ? 'Saving course' : 'Save course'}
-          className="bg-teal-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
+          className="bg-teal-600 shadow shadow-black text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
         >
           {loading ? 'Saving...' : 'Save'}
         </button>
         <button
           onClick={onPreview}
           aria-label="Preview course"
-          className="border border-teal-600 text-teal-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-teal-50 text-xs sm:text-sm"
+          className="border shadow shadow-black border-teal-600 text-teal-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-teal-50 text-xs sm:text-sm"
         >
           Preview
         </button>

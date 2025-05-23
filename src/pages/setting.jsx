@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Loading from "./Loading"; // Import the Loading component
+
 
 const AdminSettings = () => {
   const [editable, setEditable] = useState(false);
@@ -109,9 +111,7 @@ const AdminSettings = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <p className="text-gray-600 text-sm sm:text-base">Loading...</p>
-      </div>
+      <Loading />
     );
   }
 
@@ -124,7 +124,7 @@ const AdminSettings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+    <div className="min-h-screen bg-gray-100 px-3 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
       <div className="max-w-5xl sm:max-w-6xl mx-auto bg-white p-4 sm:p-6 lg:p-8 rounded-2xl shadow-md">
         {/* Header */}
         <div className="text-center h-16 sm:h-20 w-full rounded-xl bg-gradient-to-r from-blue-100 to-yellow-100 mb-6 sm:mb-8">

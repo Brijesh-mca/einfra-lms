@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { MoreVertical } from "lucide-react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Loading from "./Loading"; // Import the Loading component
+
 
 const Card = ({ children }) => (
   <div className="bg-white rounded-2xl shadow-lg p-6 w-full">{children}</div>
@@ -110,10 +112,10 @@ const UserList = ({ title, users }) => {
           <li className="text-center text-gray-500 py-2">No {title.toLowerCase()} found</li>
         )}
       </ul>
-      <div className="mt-4 flex justify-end">
+      <div className="mt-4 flex justify-end ">
         <Link
           to={title === "Instructors" ? "/manage-instructor" : "/manage-student"}
-          className="w-32 h-7 rounded text-sm card-bg text-white hover:bg-teal-600 flex items-center justify-center"
+          className="w-32 h-7 shadow shadow-black rounded text-sm card-bg text-white hover:bg-teal-600 flex items-center justify-center"
         >
           Manage {title}
         </Link>
@@ -224,7 +226,7 @@ export default function Dashboard() {
   }, [token]);
 
   if (loading) {
-    return <div className="p-6 text-gray-800">Loading...</div>;
+    return <Loading />
   }
 
   if (error) {

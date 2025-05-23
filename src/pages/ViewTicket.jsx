@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChartBar, faDownload } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+import Loading from "./Loading"; // Import the Loading component
 
 export default function ViewTicket() {
   const [tickets, setTickets] = useState([]);
@@ -202,7 +203,7 @@ export default function ViewTicket() {
   };
 
   if (loading) {
-    return <div className="p-4 sm:p-6 text-gray-800">Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {
@@ -294,7 +295,7 @@ export default function ViewTicket() {
             <div className="mt-2">
               <button
                 onClick={() => handleDownload(t.ticketId)}
-                className="border border-gray-300 px-3 py-1 rounded text-sm hover:bg-gray-100 flex items-center gap-2"
+                className="border shadow shadow-black border-gray-300 px-3 py-1 rounded text-sm hover:bg-gray-100 flex items-center gap-2"
               >
                 <FontAwesomeIcon icon={faDownload} /> Download
               </button>
@@ -337,7 +338,7 @@ export default function ViewTicket() {
                 <td className="py-2 px-4">
                   <button
                     onClick={() => handleDownload(t.ticketId)}
-                    className="border border-gray-300 px-3 py-1 rounded text-sm hover:bg-gray-100 flex items-center gap-2"
+                    className="border border-gray-300 px-3 py-1 shadow shadow-black rounded text-sm hover:bg-gray-100 flex items-center gap-2"
                   >
                     <FontAwesomeIcon icon={faDownload} /> Download
                   </button>

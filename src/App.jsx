@@ -18,7 +18,6 @@ import Setting from './pages/setting';
 import { Menu } from 'lucide-react';
 import { useAuth } from './AuthContext';
 
-
 // Child component to ensure useAuth is called inside AuthProvider
 function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -45,26 +44,28 @@ function AppContent() {
             <Sidebar onLinkClick={() => setSidebarOpen(false)} />
           </aside>
 
-          {/* Overlay on mobile */}
+          {/* Overlay on mobile - Blur effect instead of black */}
           {sidebarOpen && (
             <div
-              className="fixed inset-0 z-30 bg-black bg-opacity-40 lg:hidden"
+              className="fixed inset-0 z-30 backdrop-blur-sm bg-transparent lg:hidden"
               onClick={() => setSidebarOpen(false)}
             />
           )}
 
-          {/* Mobile Toggle Button */}
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border rounded shadow-md"
-          >
-            <Menu />
-          </button>
+          {/* Mobile Toggle Button - Only show when sidebar is closed */}
+          {!sidebarOpen && (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border rounded shadow-md"
+            >
+              <Menu />
+            </button>
+          )}
         </>
       )}
 
       {/* Main Content - Adjust margin based on sidebar visibility */}
-      <main className={`flex-1 ${showSidebar ? 'lg:ml-64' : 'ml-0'}  overflow-x-auto`}>
+      <main className={`flex-1 ${showSidebar ? 'lg:ml-64' : 'ml-0'} overflow-x-auto`}>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route
@@ -115,28 +116,22 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-            <Route
-            path="dashboard/create-course"
+          <Route
+            path="/dashboard/create-course"
             element={
               <ProtectedRoute>
-               <CreateCourse />
+                <CreateCourse />
               </ProtectedRoute>
             }
           />
-
-          
-        
-
-             <Route
+          <Route
             path="/dashboard/course-editor/:courseId"
             element={
               <ProtectedRoute>
-               <CourseEditor />
+                <CourseEditor />
               </ProtectedRoute>
             }
           />
-
-          
           <Route
             path="/memberships"
             element={
@@ -153,7 +148,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/settings"
             element={
               <ProtectedRoute>
@@ -162,7 +157,6 @@ function AppContent() {
             }
           />
         </Routes>
-        
       </main>
     </div>
   );

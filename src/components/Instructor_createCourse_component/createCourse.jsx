@@ -100,7 +100,7 @@ function CreateCourse() {
       {/* Course Form Container */}
       <div className="w-full mx-auto bg-white p-4 sm:p-6 rounded-xl shadow-md">
         {/* Tabs */}
-        <div className="flex flex-wrap sm:space-x-6 border-b">
+        <div className="flex flex-wrap sm:space-x-6 border-b mt-10">
           {['General'].map((tab) => (
             <button
               key={tab}

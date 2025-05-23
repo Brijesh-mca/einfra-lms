@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import Loading from "../Loading"
 const Memberships = () => {
   const [memberships, setMemberships] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +60,7 @@ const Memberships = () => {
   }, [token]);
 
   if (loading) {
-    return <div className="p-6 text-gray-800 text-center">Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {

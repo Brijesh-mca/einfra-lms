@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Loading from "./Loading"; // Import the Loading component
+
 
 export default function Activities() {
   const [instructors, setInstructors] = useState([]);
@@ -138,7 +140,7 @@ export default function Activities() {
   };
 
   if (loading) {
-    return <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans">Loading...</div>;
+    return <Loading />; // Show loading spinner
   }
 
   if (error) {

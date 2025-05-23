@@ -5,6 +5,8 @@ import {
 } from "recharts";
 import { ArrowLeft } from "lucide-react";
 import axios from "axios";
+import Loading from '../Loading' // Import the Loading component
+
 
 export default function RevenueReport() {
   const [timeframe, setTimeframe] = useState("day");
@@ -79,7 +81,7 @@ export default function RevenueReport() {
   };
 
   if (loading) {
-    return <div className="p-6 text-gray-800 text-center">Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {

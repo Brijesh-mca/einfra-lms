@@ -3,6 +3,7 @@ import { ChevronRight, ChevronLeft } from "lucide-react";
 import { FaPlay } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Loading from "./Loading";
 
 // Course Card Component
 const CourseCard = ({ course, onCourseClick, onPlay }) => (
@@ -222,7 +223,7 @@ const AllCoursesPage = () => {
   };
 
   if (loading) {
-    return <div className="p-4 bg-gray-50 m-3 min-h-screen">Loading...</div>;
+    return <Loading />;
   }
 
   if (error) {

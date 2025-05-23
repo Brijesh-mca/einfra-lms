@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useAuth } from "../AuthContext"; // Adjust path as per your project structure
+import { useAuth } from "../AuthContext"; // Adjust path if needed
+import Loading from "./Loading"; // Import the Loading component
 
 const ManageStudent = () => {
   const { token } = useAuth();
@@ -23,10 +23,10 @@ const ManageStudent = () => {
   const [loading, setLoading] = useState(true);
   const [toggleLoading, setToggleLoading] = useState({});
 
-  // Fetch students on component mount
   useEffect(() => {
     const fetchStudents = async () => {
       try {
+      const token = localStorage.getItem("authToken");
         const response = await axios.get(
           "https://lms-backend-flwq.onrender.com/api/v1/admin/users/students",
           {
@@ -40,7 +40,7 @@ const ManageStudent = () => {
           setError("Failed to fetch students: " + response.data.message);
         }
       } catch (err) {
-        setError(err.response?.data?.message || "Error fetching students");
+        setError(err.response?.data?.message || `Error fetching students: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -82,7 +82,7 @@ const ManageStudent = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:6600/api/v1/admin/users/students",
+        "https://lms-backend-flwq.onrender.com/api/v1/admin/users/students",
         newStudent,
         {
           headers: {
@@ -107,15 +107,20 @@ const ManageStudent = () => {
           interests: "",
         });
       } else {
-        setError("Failed to enroll student");
+        setError("Failed to enroll student: " + response.data.message);
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Error enrolling student");
+      setError(err.response?.data?.message || `Error enrolling student: ${err.message}`);
     }
   };
 
   const handleToggleStatus = async (studentId) => {
+    
+    
     const student = students.find((s) => s._id === studentId);
+    
+
+
     if (!student) return setError("Student not found");
 
     const newStatus = !student.isActive;
@@ -139,6 +144,7 @@ const ManageStudent = () => {
         setStudents(
           students.map((student) =>
             student._id === studentId
+
               ? { ...student, isActive: response.data.data.isActive }
               : student
           )
@@ -154,33 +160,6 @@ const ManageStudent = () => {
       setError(`Error toggling student status: ${errorMessage}`);
     } finally {
       setToggleLoading((prev) => ({ ...prev, [studentId]: false }));
-    }
-  };
-
-  const handleDelete = async (studentId) => {
-    if (!window.confirm("Are you sure you want to delete this student?")) {
-      return;
-    }
-
-    setError("");
-    try {
-      const response = await axios.delete(
-        `https://lms-backend-flwq.onrender.com/api/v1/admin/users/students/${studentId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (response.data.success) {
-        setStudents(students.filter((student) => student._id !== studentId));
-        setSelectedStudent(null); // Close popup
-      } else {
-        setError("Failed to delete student");
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || "Error deleting student");
     }
   };
 
@@ -215,25 +194,21 @@ const ManageStudent = () => {
         </h1>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+          className="card-bg text-white shadow shadow-black px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
         >
           Enroll Student
         </button>
       </div>
 
-      {/* Error Message */}
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">{error}</div>
       )}
-
-      {/* Loading State */}
       {loading ? (
-        <div className="text-center text-gray-600">Loading students...</div>
+        <Loading />
       ) : students.length === 0 ? (
         <div className="text-center text-gray-600">No students found.</div>
       ) : (
         <>
-          {/* Enroll Modal */}
           {isModalOpen && (
             <div
               className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50"
@@ -245,9 +220,7 @@ const ManageStudent = () => {
                 </h2>
                 <form onSubmit={handleSubmit}>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">
-                      First Name
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700">First Name</label>
                     <input
                       type="text"
                       name="firstName"
@@ -258,9 +231,7 @@ const ManageStudent = () => {
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Last Name
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700">Last Name</label>
                     <input
                       type="text"
                       name="lastName"
@@ -271,9 +242,7 @@ const ManageStudent = () => {
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Email
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700">Email</label>
                     <input
                       type="email"
                       name="email"
@@ -284,9 +253,7 @@ const ManageStudent = () => {
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Password
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700">Password</label>
                     <input
                       type="password"
                       name="password"
@@ -298,9 +265,7 @@ const ManageStudent = () => {
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Phone
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700">Phone</label>
                     <input
                       type="text"
                       name="phone"
@@ -310,9 +275,7 @@ const ManageStudent = () => {
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Education
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700">Education</label>
                     <input
                       type="text"
                       name="education"
@@ -322,9 +285,7 @@ const ManageStudent = () => {
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Occupation
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700">Occupation</label>
                     <input
                       type="text"
                       name="occupation"
@@ -379,7 +340,6 @@ const ManageStudent = () => {
             </div>
           )}
 
-          {/* Details Popup */}
           {selectedStudent && (
             <div
               className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50"
@@ -433,12 +393,6 @@ const ManageStudent = () => {
                       : "Activate"}
                   </button>
                   <button
-                    onClick={() => handleDelete(selectedStudent._id)}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm sm:text-base"
-                  >
-                    Delete
-                  </button>
-                  <button
                     onClick={() => setSelectedStudent(null)}
                     className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
                   >
@@ -449,7 +403,6 @@ const ManageStudent = () => {
             </div>
           )}
 
-          {/* Desktop Table */}
           <div className="hidden sm:block bg-white rounded-lg shadow-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full">
@@ -487,7 +440,7 @@ const ManageStudent = () => {
                       <td className="py-4 px-6 text-sm">
                         <button
                           onClick={() => openDetailsPopup(student)}
-                          className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                          className="card-bg text-white shadow shadow-black px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
                         >
                           More
                         </button>
@@ -499,7 +452,6 @@ const ManageStudent = () => {
             </div>
           </div>
 
-          {/* Mobile Card Layout */}
           <div className="sm:hidden space-y-4">
             {students.map((student) => (
               <div
@@ -525,7 +477,7 @@ const ManageStudent = () => {
                   <div className="mt-3">
                     <button
                       onClick={() => openDetailsPopup(student)}
-                      className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                      className="card-bg text-white shadow shadow-black px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
                     >
                       More
                     </button>
