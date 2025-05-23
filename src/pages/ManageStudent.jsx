@@ -2,6 +2,20 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../AuthContext"; // Adjust path if needed
 import Loading from "./Loading"; // Import the Loading component
+import {
+  FaUser,
+  FaEnvelope,
+  FaPhone,
+  FaGraduationCap,
+  FaBriefcase,
+  FaCode,
+  FaHeart,
+  FaCheckCircle,
+  FaShieldAlt,
+  FaCalendarAlt,
+  FaSignInAlt,
+  FaCog,
+} from "react-icons/fa";
 
 const ManageStudent = () => {
   const { token } = useAuth();
@@ -22,11 +36,14 @@ const ManageStudent = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [toggleLoading, setToggleLoading] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-      const token = localStorage.getItem("authToken");
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
         const response = await axios.get(
           "https://lms-backend-flwq.onrender.com/api/v1/admin/users/students",
           {
@@ -34,13 +51,18 @@ const ManageStudent = () => {
             timeout: 10000,
           }
         );
-        if (response.data.success) {
+        if (response.data.success && Array.isArray(response.data.data)) {
           setStudents(response.data.data);
+          console.log("Fetched students:", response.data.data);
         } else {
-          setError("Failed to fetch students: " + response.data.message);
+          setError("Failed to fetch students: Invalid response data");
         }
       } catch (err) {
-        setError(err.response?.data?.message || `Error fetching students: ${err.message}`);
+        console.error("Fetch students error:", err);
+        setError(
+          err.response?.data?.message ||
+            `Error fetching students: ${err.message}`
+        );
       } finally {
         setLoading(false);
       }
@@ -92,7 +114,7 @@ const ManageStudent = () => {
           timeout: 10000,
         }
       );
-      if (response.data.success) {
+      if (response.data.success && response.data.data) {
         setStudents([response.data.data, ...students]);
         setIsModalOpen(false);
         setFormData({
@@ -106,56 +128,61 @@ const ManageStudent = () => {
           skills: "",
           interests: "",
         });
+        setSearchQuery("");
       } else {
-        setError("Failed to enroll student: " + response.data.message);
+        setError("Failed to enroll student: Invalid response data");
       }
     } catch (err) {
-      setError(err.response?.data?.message || `Error enrolling student: ${err.message}`);
+      console.error("Enroll student error:", err);
+      setError(
+        err.response?.data?.message || `Error enrolling student: ${err.message}`
+      );
     }
   };
 
   const handleToggleStatus = async (studentId) => {
-    
-    
     const student = students.find((s) => s._id === studentId);
-    
-
-
-    if (!student) return setError("Student not found");
+    if (!student) {
+      setError("Student not found");
+      return;
+    }
 
     const newStatus = !student.isActive;
     setToggleLoading((prev) => ({ ...prev, [studentId]: true }));
     setError("");
 
     try {
-      const config = {
-        method: "PATCH",
-        url: `https://lms-backend-flwq.onrender.com/api/v1/admin/users/students/${studentId}/toggle-active`,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        data: { isActive: newStatus },
-        timeout: 10000,
-      };
-      const response = await axios(config);
+      const response = await axios.patch(
+        `https://lms-backend-flwq.onrender.com/api/v1/admin/users/students/${studentId}/toggle-active`,
+        { isActive: newStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          timeout: 10000,
+        }
+      );
 
-      if (response.data.success) {
+      if (response.data.success && response.data.data) {
         setStudents(
-          students.map((student) =>
-            student._id === studentId
-
-              ? { ...student, isActive: response.data.data.isActive }
-              : student
+          students.map((s) =>
+            s._id === studentId
+              ? { ...s, isActive: response.data.data.isActive }
+              : s
           )
         );
         if (selectedStudent && selectedStudent._id === studentId) {
-          setSelectedStudent({ ...selectedStudent, isActive: response.data.data.isActive });
+          setSelectedStudent({
+            ...selectedStudent,
+            isActive: response.data.data.isActive,
+          });
         }
       } else {
-        setError("Failed to toggle student status: " + response.data.message);
+        setError("Failed to toggle student status: Invalid response data");
       }
     } catch (err) {
+      console.error("Toggle status error:", err);
       const errorMessage = err.response?.data?.message || err.message;
       setError(`Error toggling student status: ${errorMessage}`);
     } finally {
@@ -179,6 +206,7 @@ const ManageStudent = () => {
         skills: "",
         interests: "",
       });
+      setSearchQuery("");
     }
   };
 
@@ -186,27 +214,65 @@ const ManageStudent = () => {
     setSelectedStudent(student);
   };
 
+  const filteredStudents = students.filter((student) => {
+    if (!student) return false;
+    const fullName = `${student.firstName || ""} ${student.lastName || ""}`
+      .toLowerCase()
+      .trim();
+    const email = (student.email || "").toLowerCase().trim();
+    const query = (searchQuery || "").toLowerCase().trim();
+
+    return fullName.includes(query) || email.includes(query);
+  });
+
   return (
     <div className="container mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6 mt-10">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left">
-          Manage Students
-        </h1>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="card-bg text-white shadow shadow-black px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
-        >
-          Enroll Student
-        </button>
+      <div className="mb-6 mt-10">
+        <div className="flex flex-row items-center justify-between sm:items-center sm:flex-row sm:gap-4">
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-800 text-left">
+            Manage Students
+          </h1>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="card-bg text-white shadow shadow-black px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+          >
+            Enroll Student
+          </button>
+        </div>
+        <div className="mt-4 flex justify-end sm:mt-0 sm:ml-4">
+          <div className="mt-3 relative w-full sm:w-64 md:w-100 lg:w-100">
+            <input
+              type="text"
+              placeholder="Search by name or email"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">{error}</div>
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+          {error}
+        </div>
       )}
       {loading ? (
         <Loading />
-      ) : students.length === 0 ? (
-        <div className="text-center text-gray-600">No students found.</div>
+      ) : filteredStudents.length === 0 ? (
+        <div className="text-center text-gray-600">
+          {searchQuery
+            ? "No students found matching your search."
+            : "No students found."}
+        </div>
       ) : (
         <>
           {isModalOpen && (
@@ -220,78 +286,92 @@ const ManageStudent = () => {
                 </h2>
                 <form onSubmit={handleSubmit}>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">First Name</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      First Name
+                    </label>
                     <input
                       type="text"
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       required
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Last Name
+                    </label>
                     <input
                       type="text"
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       required
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Email
+                    </label>
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       required
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">Password</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Password
+                    </label>
                     <input
                       type="password"
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       required
                       placeholder="Enter password (min 6 characters)"
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">Phone</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Phone
+                    </label>
                     <input
                       type="text"
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">Education</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Education
+                    </label>
                     <input
                       type="text"
                       name="education"
                       value={formData.education}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">Occupation</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Occupation
+                    </label>
                     <input
                       type="text"
                       name="occupation"
                       value={formData.occupation}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     />
                   </div>
                   <div className="mb-4">
@@ -303,7 +383,7 @@ const ManageStudent = () => {
                       name="skills"
                       value={formData.skills}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       placeholder="e.g., Python, SQL"
                     />
                   </div>
@@ -316,7 +396,7 @@ const ManageStudent = () => {
                       name="interests"
                       value={formData.interests}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       placeholder="e.g., AI, ML"
                     />
                   </div>
@@ -324,13 +404,13 @@ const ManageStudent = () => {
                     <button
                       type="button"
                       onClick={() => setIsModalOpen(false)}
-                      className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm sm:text-base"
+                      className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                     >
                       Enroll
                     </button>
@@ -347,43 +427,91 @@ const ManageStudent = () => {
             >
               <div className="bg-white border-2 border-blue-400 rounded-lg p-4 sm:p-6 w-11/12 sm:w-3/4 md:w-1/2 lg:w-1/3 max-h-[80vh] overflow-y-auto">
                 <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800">
-                  {`${selectedStudent.firstName} ${selectedStudent.lastName}`} Details
+                  {`${selectedStudent.firstName || "N/A"} ${selectedStudent.lastName || "N/A"}`} Details
                 </h2>
-                <div className="space-y-2 text-sm sm:text-base text-gray-600">
-                  <p><strong>First Name:</strong> {selectedStudent.firstName}</p>
-                  <p><strong>Last Name:</strong> {selectedStudent.lastName}</p>
-                  <p><strong>Email:</strong> {selectedStudent.email}</p>
-                  <p><strong>Phone:</strong> {selectedStudent.phone || "N/A"}</p>
-                  <p><strong>Education:</strong> {selectedStudent.education || "N/A"}</p>
-                  <p><strong>Occupation:</strong> {selectedStudent.occupation || "N/A"}</p>
-                  <p><strong>Skills:</strong> {selectedStudent.skills || "N/A"}</p>
-                  <p><strong>Interests:</strong> {selectedStudent.interests || "N/A"}</p>
-                  <p>
-                    <strong>Status:</strong>
-                    <span
-                      className={`inline-block px-2 py-1 ml-2 rounded-full text-xs font-medium ${
-                        selectedStudent.isActive
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {selectedStudent.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </p>
-                  <p><strong>Verified:</strong> {selectedStudent.isVerified ? "Yes" : "No"}</p>
-                  <p><strong>Created At:</strong> {new Date(selectedStudent.createdAt).toLocaleString()}</p>
-                  <p><strong>Last Login:</strong> {selectedStudent.lastLogin ? new Date(selectedStudent.lastLogin).toLocaleString() : "N/A"}</p>
+                <div className="space-y-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <FaUser className="text-blue-500 text-sm" />
+                    <p><strong>First Name:</strong> {selectedStudent.firstName || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaUser className="text-blue-500 text-sm" />
+                    <p><strong>Last Name:</strong> {selectedStudent.lastName || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaEnvelope className="text-blue-500 text-sm" />
+                    <p><strong>Email:</strong> {selectedStudent.email || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaPhone className="text-blue-500 text-sm" />
+                    <p><strong>Phone:</strong> {selectedStudent.phone || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaGraduationCap className="text-blue-500 text-sm" />
+                    <p><strong>Education:</strong> {selectedStudent.education || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaBriefcase className="text-blue-500 text-sm" />
+                    <p><strong>Occupation:</strong> {selectedStudent.occupation || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCode className="text-blue-500 text-sm" />
+                    <p><strong>Skills:</strong> {selectedStudent.skills || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaHeart className="text-blue-500 text-sm" />
+                    <p><strong>Interests:</strong> {selectedStudent.interests || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCheckCircle className="text-blue-500 text-sm" />
+                    <p>
+                      <strong>Status:</strong>
+                      <span
+                        className={`inline-block px-2 py-1 ml-2 rounded-full text-xs font-medium ${
+                          selectedStudent.isActive
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {selectedStudent.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaShieldAlt className="text-blue-500 text-sm" />
+                    <p><strong>Verified:</strong> {selectedStudent.isVerified ? "Yes" : "No"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCalendarAlt className="text-blue-500 text-sm" />
+                    <p>
+                      <strong>Created At:</strong>{" "}
+                      {selectedStudent.createdAt
+                        ? new Date(selectedStudent.createdAt).toLocaleString()
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaSignInAlt className="text-blue-500 text-sm" />
+                    <p>
+                      <strong>Last Login:</strong>{" "}
+                      {selectedStudent.lastLogin
+                        ? new Date(selectedStudent.lastLogin).toLocaleString()
+                        : "N/A"}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex justify-end mt-4 space-x-2">
                   <button
                     onClick={() => handleToggleStatus(selectedStudent._id)}
                     disabled={toggleLoading[selectedStudent._id]}
-                    className={`px-4 py-2 text-white rounded-lg text-sm sm:text-base ${
+                    className={`px-4 py-2 text-white rounded-lg text-sm ${
                       selectedStudent.isActive
                         ? "bg-red-600 hover:bg-red-700"
                         : "bg-green-600 hover:bg-green-700"
                     } ${
-                      toggleLoading[selectedStudent._id] ? "opacity-50 cursor-not-allowed" : ""
+                      toggleLoading[selectedStudent._id]
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
                     }`}
                   >
                     {toggleLoading[selectedStudent._id]
@@ -394,7 +522,7 @@ const ManageStudent = () => {
                   </button>
                   <button
                     onClick={() => setSelectedStudent(null)}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
                   >
                     Close
                   </button>
@@ -408,24 +536,73 @@ const ManageStudent = () => {
               <table className="min-w-full">
                 <thead className="bg-gray-200">
                   <tr>
-                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">Name</th>
-                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">Email</th>
-                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">Phone</th>
-                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">Skills</th>
-                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">Status</th>
-                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">Action</th>
+                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
+                      <div className="flex items-center gap-2">
+                        <FaUser className="text-blue-500 text-sm" />
+                        Name
+                      </div>
+                    </th>
+                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
+                      <div className="flex items-center gap-2">
+                        <FaEnvelope className="text-blue-500 text-sm" />
+                        Email
+                      </div>
+                    </th>
+                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
+                      <div className="flex items-center gap-2">
+                        <FaPhone className="text-blue-500 text-sm" />
+                        Phone
+                      </div>
+                    </th>
+                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
+                      <div className="flex items-center gap-2">
+                        <FaCode className="text-blue-500 text-sm" />
+                        Skills
+                      </div>
+                    </th>
+                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
+                      <div className="flex items-center gap-2">
+                        <FaCheckCircle className="text-blue-500 text-sm" />
+                        Status
+                      </div>
+                    </th>
+                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
+                      <div className="flex items-center gap-2">
+                        <FaCog className="text-blue-500 text-sm" />
+                        Action
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {students.map((student) => (
+                  {filteredStudents.map((student) => (
                     <tr
-                      key={student._id}
+                      key={student._id || Math.random()}
                       className="border-b hover:bg-gray-100 transition-colors"
                     >
-                      <td className="py-4 px-6 text-sm text-gray-800 font-medium">{`${student.firstName} ${student.lastName}`}</td>
-                      <td className="py-4 px-6 text-sm text-gray-600">{student.email}</td>
-                      <td className="py-4 px-6 text-sm text-gray-600">{student.phone || "N/A"}</td>
-                      <td className="py-4 px-6 text-sm text-gray-600">{student.skills || "N/A"}</td>
+                      <td className="py-4 px-6 text-sm text-gray-800 font-medium">
+                        <div className="flex items-center gap-2">
+                          {/* <FaUser className="text-blue-500 text-sm" /> */}
+                          <div className="flex items-center space-x-3">
+                            <img
+                              src={student.avatar || "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"}
+                              alt={`${student.firstName || "N/A"} ${student.lastName || "N/A"}`}
+                              className="w-10 h-10 rounded-full object-cover"
+                              onError={(e) => (e.target.src = "")}
+                            />
+                            <span>{`${student.firstName || "N/A"} ${student.lastName || "N/A"}`}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-6 text-sm text-gray-600">
+                        {student.email || "N/A"}
+                      </td>
+                      <td className="py-4 px-6 text-sm text-gray-600">
+                        {student.phone || "N/A"}
+                      </td>
+                      <td className="py-4 px-6 text-sm text-gray-600">
+                        {student.skills || "N/A"}
+                      </td>
                       <td className="py-4 px-6 text-sm">
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
@@ -440,7 +617,7 @@ const ManageStudent = () => {
                       <td className="py-4 px-6 text-sm">
                         <button
                           onClick={() => openDetailsPopup(student)}
-                          className="card-bg text-white shadow shadow-black px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                          className="card-bg text-white shadow shadow-black px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs"
                         >
                           More
                         </button>
@@ -453,31 +630,58 @@ const ManageStudent = () => {
           </div>
 
           <div className="sm:hidden space-y-4">
-            {students.map((student) => (
+            {filteredStudents.map((student) => (
               <div
-                key={student._id}
+                key={student._id || Math.random()}
                 className="bg-white rounded-lg shadow-md p-4 border border-gray-200"
               >
                 <div className="mb-3">
-                  <h3 className="text-lg font-semibold text-gray-800">{`${student.firstName} ${student.lastName}`}</h3>
-                  <span
-                    className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                      student.isActive
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {student.isActive ? "Active" : "Inactive"}
-                  </span>
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src={student.avatar || "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"}
+                      alt={`${student.firstName || "N/A"} ${student.lastName || "N/A"}`}
+                      className="w-12 h-12 rounded-full object-cover"
+                      onError={(e) => (e.target.src = "")}
+                    />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        {/* <FaUser className="text-blue-500 text-sm" /> */}
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {`${student.firstName || "N/A"} ${student.lastName || "N/A"}`}
+                        </h3>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        {/* <FaCheckCircle className="text-blue-500 text-sm" /> */}
+                        <span
+                          className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                            student.isActive
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {student.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div className="space-y-2 text-sm text-gray-600">
-                  <p><strong>Email:</strong> {student.email}</p>
-                  <p><strong>Phone:</strong> {student.phone || "N/A"}</p>
-                  <p><strong>Skills:</strong> {student.skills || "N/A"}</p>
+                  <div className="flex items-center gap-2">
+                    <FaEnvelope className="text-blue-500 text-sm" />
+                    <p><strong>Email:</strong> {student.email || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaPhone className="text-blue-500 text-sm" />
+                    <p><strong>Phone:</strong> {student.phone || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCode className="text-blue-500 text-sm" />
+                    <p><strong>Skills:</strong> {student.skills || "N/A"}</p>
+                  </div>
                   <div className="mt-3">
                     <button
                       onClick={() => openDetailsPopup(student)}
-                      className="card-bg text-white shadow shadow-black px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                      className="card-bg text-white shadow shadow-black px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs"
                     >
                       More
                     </button>

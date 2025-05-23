@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import Loading from "./Loading"; // Import the Loading component
 
-
 const Card = ({ children }) => (
   <div className="bg-white rounded-2xl shadow-lg p-6 w-full">{children}</div>
 );
@@ -144,7 +143,7 @@ export default function Dashboard() {
   const [instructors, setInstructors] = useState([]);
   const [students, setStudents] = useState([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
-  const [dropOutRate, setDropOutRate] = useState(0);
+  const [totalEnrollments, setTotalEnrollments] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const limit = 6; // Users per list
@@ -160,9 +159,9 @@ export default function Dashboard() {
     }).format(value);
   };
 
-  // Format percentage
-  const formatPercentage = (value) => {
-    return `${Math.round(value)}%`;
+  // Format number
+  const formatNumber = (value) => {
+    return new Intl.NumberFormat("en-US").format(value);
   };
 
   useEffect(() => {
@@ -199,11 +198,11 @@ export default function Dashboard() {
         console.log("Revenue response:", revenueResponse.data);
         setTotalRevenue(revenueResponse.data.data.totalRevenue || 0);
 
-        // Fetch drop-out rate
-        console.log("Fetching drop-out rate");
-        const dropOutResponse = await axiosInstance.get("/analytics/drop-out");
-        console.log("Drop-out response:", dropOutResponse.data);
-        setDropOutRate(dropOutResponse.data.data.dropOutRate || 0);
+        // Fetch total enrollments
+        console.log("Fetching total enrollments");
+        const enrollmentResponse = await axiosInstance.get("/analytics/total-enrollments");
+        console.log("Enrollment response:", enrollmentResponse.data);
+        setTotalEnrollments(enrollmentResponse.data.data.totalEnrollments || 0);
 
         setLoading(false);
       } catch (error) {
@@ -226,7 +225,7 @@ export default function Dashboard() {
   }, [token]);
 
   if (loading) {
-    return <Loading />
+    return <Loading />;
   }
 
   if (error) {
@@ -244,9 +243,9 @@ export default function Dashboard() {
           to="/revenues-report"
         />
         <InfoCard
-          title="Lost Membership"
-          value={formatPercentage(dropOutRate)}
-          link="All Membership"
+          title="Total Enrollment"
+          value={formatNumber(totalEnrollments)}
+          link="All Enrollments"
           to="/memberships"
         />
       </div>

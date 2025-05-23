@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Loading from "./Loading"; // Import the Loading component
 
-
 export default function Activities() {
   const [instructors, setInstructors] = useState([]);
   const [students, setStudents] = useState([]);
@@ -14,10 +13,21 @@ export default function Activities() {
   const [studentPage, setStudentPage] = useState(1);
   const [instructorTotal, setInstructorTotal] = useState(0);
   const [studentTotal, setStudentTotal] = useState(0);
+  const [instructorSort, setInstructorSort] = useState('Newest'); // State for instructor sort order
+  const [studentSort, setStudentSort] = useState('Newest'); // State for student sort order
   const [limit] = useState(10); // Items per page
 
   // Replace with your actual token retrieval logic
   const token = localStorage.getItem('authToken'); // Adjust as needed
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(new Date(dateString));
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,34 +41,57 @@ export default function Activities() {
           },
         });
 
-        // Fetch instructor data with pagination
-        const instructorResponse = await axiosInstance.get(`/instructor-activity?page=${instructorPage}&limit=${limit}`);
+        // Determine sort parameter based on sort state
+        const instructorSortParam = instructorSort === 'Newest' ? 'createdAt:desc' : 'createdAt:asc';
+        const studentSortParam = studentSort === 'Newest' ? 'createdAt:desc' : 'createdAt:asc';
+
+        // Fetch instructor data with pagination and sorting
+        const instructorResponse = await axiosInstance.get(
+          `/instructor-activity?page=${instructorPage}&limit=${limit}&sort=${instructorSortParam}`
+        );
         const instructorData = instructorResponse.data;
 
-        // Fetch student data with pagination
-        const studentResponse = await axiosInstance.get(`/student-activity?page=${studentPage}&limit=${limit}`);
+        // Fetch student data with pagination and sorting
+        const studentResponse = await axiosInstance.get(
+          `/student-activity?page=${studentPage}&limit=${limit}&sort=${studentSortParam}`
+        );
         const studentData = studentResponse.data;
 
-        // Map instructor data
+        // Map instructor data with createdAt
         const mappedInstructors = instructorData.data.map((inst) => ({
           id: inst._id,
           name: `${inst.instructor.firstName} ${inst.instructor.lastName}`,
           email: inst.instructor.email,
           course: inst.title,
+          createdAt: inst.createdAt,
         }));
 
-        // Map student data
+        // Map student data with createdAt (assuming student data has createdAt)
         const mappedStudents = studentData.data.map((stud) => ({
           id: stud._id,
           name: `${stud.student.firstName} ${stud.student.lastName}`,
           email: stud.student.email,
           assignment: stud.course ? stud.course.title : 'No Course Assigned',
+          createdAt: stud.createdAt || new Date().toISOString(), // Fallback to current date if missing
         }));
 
-        setInstructors(mappedInstructors);
-        setStudents(mappedStudents);
-        setInstructorTotal(instructorData.total || mappedInstructors.length);
-        setStudentTotal(studentData.total || mappedStudents.length);
+        // Client-side sorting as fallback
+        const sortedInstructors = mappedInstructors.sort((a, b) => {
+          const dateA = new Date(a.createdAt);
+          const dateB = new Date(b.createdAt);
+          return instructorSort === 'Newest' ? dateB - dateA : dateA - dateB;
+        });
+
+        const sortedStudents = mappedStudents.sort((a, b) => {
+          const dateA = new Date(a.createdAt);
+          const dateB = new Date(b.createdAt);
+          return studentSort === 'Newest' ? dateB - dateA : dateA - dateB;
+        });
+
+        setInstructors(sortedInstructors);
+        setStudents(sortedStudents);
+        setInstructorTotal(instructorData.total || sortedInstructors.length);
+        setStudentTotal(studentData.total || sortedStudents.length);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -77,7 +110,7 @@ export default function Activities() {
       setError('No authentication token found. Please log in.');
       setLoading(false);
     }
-  }, [token, instructorPage, studentPage, limit]);
+  }, [token, instructorPage, studentPage, instructorSort, studentSort, limit]);
 
   // Filter instructors based on search input
   const filteredInstructors = instructors.filter(
@@ -149,9 +182,12 @@ export default function Activities() {
 
   return (
     <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans">
-     <h1 className="text-2xl md:text-4xl font-bold mb-6 md:mb-8 mt-10 text-center md:text-left">
-  Activities
-</h1>
+      <h1 className="text-2xl md:text-4xl font-bold mb-6 md:mb-8 mt-10 text-center md:text-left">
+        Activities
+      </h1>
+      <p className="text-sm text-gray-500 mb-4">
+        {/* Current date: May 23, 2025 (Sorted activities are relative to this date) */}
+      </p>
 
       {/* Instructors Section */}
       <section className="bg-white p-4 md:p-6 rounded-2xl shadow mb-8 md:mb-10">
@@ -168,9 +204,16 @@ export default function Activities() {
               }}
               className="px-3 py-1 border border-blue-500 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
-            <select className="px-2 py-1 border border-blue-500 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-300">
-              <option>Newest</option>
-              <option>Oldest</option>
+            <select
+              value={instructorSort}
+              onChange={(e) => {
+                setInstructorSort(e.target.value);
+                setInstructorPage(1); // Reset to first page on sort change
+              }}
+              className="px-2 py-1 border border-blue-500 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-300"
+            >
+              <option value="Newest">Newest</option>
+              <option value="Oldest">Oldest</option>
             </select>
           </div>
         </div>
@@ -188,8 +231,11 @@ export default function Activities() {
               <p className="text-sm text-gray-600 mb-1">
                 <span className="font-semibold">Email:</span> {inst.email}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 mb-1">
                 <span className="font-semibold">Course:</span> {inst.course}
+              </p>
+              <p className="text-sm text-gray-600">
+                <span className="font-semibold">Created:</span> {formatDate(inst.createdAt)}
               </p>
             </div>
           ))}
@@ -204,6 +250,7 @@ export default function Activities() {
                 <th className="whitespace-nowrap px-4">ID</th>
                 <th className="whitespace-nowrap px-4">Email</th>
                 <th className="whitespace-nowrap px-4">Courses</th>
+                <th className="whitespace-nowrap px-4">Created</th>
               </tr>
             </thead>
             <tbody>
@@ -213,6 +260,7 @@ export default function Activities() {
                   <td className="whitespace-nowrap px-4">{inst.id}</td>
                   <td className="whitespace-nowrap px-4">{inst.email}</td>
                   <td className="whitespace-nowrap px-4">{inst.course}</td>
+                  <td className="whitespace-nowrap px-4">{formatDate(inst.createdAt)}</td>
                 </tr>
               ))}
             </tbody>
@@ -243,9 +291,16 @@ export default function Activities() {
               }}
               className="px-3 py-1 border border-blue-500 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
-            <select className="px-2 py-1 border border-blue-500 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-300">
-              <option>Newest</option>
-              <option>Oldest</option>
+            <select
+              value={studentSort}
+              onChange={(e) => {
+                setStudentSort(e.target.value);
+                setStudentPage(1); // Reset to first page on sort change
+              }}
+              className="px-2 py-1 border border-blue-500 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-300"
+            >
+              <option value="Newest">Newest</option>
+              <option value="Oldest">Oldest</option>
             </select>
           </div>
         </div>
@@ -263,8 +318,11 @@ export default function Activities() {
               <p className="text-sm text-gray-600 mb-1">
                 <span className="font-semibold">Email:</span> {stud.email}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 mb-1">
                 <span className="font-semibold">Assignment:</span> {stud.assignment}
+              </p>
+              <p className="text-sm text-gray-600">
+                <span className="font-semibold">Created:</span> {formatDate(stud.createdAt)}
               </p>
             </div>
           ))}
@@ -279,6 +337,7 @@ export default function Activities() {
                 <th className="whitespace-nowrap px-4">ID</th>
                 <th className="whitespace-nowrap px-4">Email</th>
                 <th className="whitespace-nowrap px-4">Assignment</th>
+                <th className="whitespace-nowrap px-4">Created</th>
               </tr>
             </thead>
             <tbody>
@@ -288,6 +347,7 @@ export default function Activities() {
                   <td className="whitespace-nowrap px-4">{stud.id}</td>
                   <td className="whitespace-nowrap px-4">{stud.email}</td>
                   <td className="whitespace-nowrap px-4">{stud.assignment}</td>
+                  <td className="whitespace-nowrap px-4">{formatDate(stud.createdAt)}</td>
                 </tr>
               ))}
             </tbody>

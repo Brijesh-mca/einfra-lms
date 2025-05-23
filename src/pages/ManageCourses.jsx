@@ -86,42 +86,48 @@ const InstructorRow = ({ instructor, onCourseClick, onPlay }) => {
   return (
     <div className="mb-10 bg-white shadow-lg rounded-xl p-4">
       <h3 className="text-lg font-medium mb-3">{instructor.name}</h3>
-      <div className="relative overflow-hidden">
-        <div
-          ref={scrollRef}
-          className="flex overflow-x-auto no-scrollbar space-x-4 pr-4"
-          style={{ scrollBehavior: "smooth", overflowY: "hidden" }}
-        >
-          {instructor.courses.map((course) => (
-            <CourseCard
-              key={course._id}
-              course={course}
-              onCourseClick={onCourseClick}
-              onPlay={onPlay}
-            />
-          ))}
+      {instructor.courses.length === 0 ? (
+        <div className="text-center text-gray-500 py-4">
+          No courses found for this instructor
         </div>
-
-        {/* Scroll Left Arrow */}
-        {instructor.courses.length > 3 && (
+      ) : (
+        <div className="relative overflow-hidden">
           <div
-            onClick={scrollLeft}
-            className="absolute left-0 border border-cyan-400 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-lg cursor-pointer z-10"
+            ref={scrollRef}
+            className="flex overflow-x-auto no-scrollbar space-x-4 pr-4"
+            style={{ scrollBehavior: "smooth", overflowY: "hidden" }}
           >
-            <ChevronLeft className="w-6 h-6 text-blue-700" />
+            {instructor.courses.map((course) => (
+              <CourseCard
+                key={course._id}
+                course={course}
+                onCourseClick={onCourseClick}
+                onPlay={onPlay}
+              />
+            ))}
           </div>
-        )}
 
-        {/* Scroll Right Arrow */}
-        {instructor.courses.length > 3 && (
-          <div
-            onClick={scrollRight}
-            className="absolute right-4 border border-cyan-400 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-md cursor-pointer z-10"
-          >
-            <ChevronRight className="w-6 h-6 text-blue-700" />
-          </div>
-        )}
-      </div>
+          {/* Scroll Left Arrow */}
+          {instructor.courses.length > 3 && (
+            <div
+              onClick={scrollLeft}
+              className="absolute left-0 border border-cyan-400 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-lg cursor-pointer z-10"
+            >
+              <ChevronLeft className="w-6 h-6 text-blue-700" />
+            </div>
+          )}
+
+          {/* Scroll Right Arrow */}
+          {instructor.courses.length > 3 && (
+            <div
+              onClick={scrollRight}
+              className="absolute right-4 border border-cyan-400 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-md cursor-pointer z-10"
+            >
+              <ChevronRight className="w-6 h-6 text-blue-700" />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

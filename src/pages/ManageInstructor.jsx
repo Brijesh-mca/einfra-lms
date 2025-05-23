@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../AuthContext"; // Adjust path as per your project structure
 import Loading from "./Loading";
+import { FaUser, FaEnvelope, FaPhone, FaCode, FaCheckCircle, FaBook, FaImage, FaInfoCircle, FaLink, FaUserTag, FaShieldAlt, FaStar, FaUsers, FaDollarSign, FaCheck, FaCalendarAlt, FaSignInAlt, FaCog } from "react-icons/fa";
 
 const ManageInstructor = () => {
   const { token } = useAuth();
@@ -30,11 +31,15 @@ const ManageInstructor = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [toggleLoading, setToggleLoading] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch instructors on component mount
   useEffect(() => {
     const fetchInstructors = async () => {
       try {
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
         const response = await axios.get(
           "https://lms-backend-flwq.onrender.com/api/v1/admin/users/instructors",
           {
@@ -42,13 +47,13 @@ const ManageInstructor = () => {
             timeout: 10000,
           }
         );
-        if (response.data.success) {
+        if (response.data.success && Array.isArray(response.data.data)) {
           setInstructors(response.data.data);
         } else {
-          setError("Failed to fetch instructors");
+          setError("Failed to fetch instructors: Invalid response data");
         }
       } catch (err) {
-        setError(err.response?.data?.message || "Error fetching instructors");
+        setError(err.response?.data?.message || `Error fetching instructors: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -113,7 +118,7 @@ const ManageInstructor = () => {
           timeout: 10000,
         }
       );
-      if (response.data.success) {
+      if (response.data.success && response.data.data) {
         setInstructors([response.data.data, ...instructors]);
         setIsModalOpen(false);
         setFormData({
@@ -135,11 +140,12 @@ const ManageInstructor = () => {
           earnings: 0,
           approved: false,
         });
+        setSearchQuery("");
       } else {
-        setError("Failed to enroll instructor");
+        setError("Failed to enroll instructor: Invalid response data");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Error enrolling instructor");
+      setError(err.response?.data?.message || `Error enrolling instructor: ${err.message}`);
     }
   };
 
@@ -164,7 +170,7 @@ const ManageInstructor = () => {
         }
       );
 
-      if (response.data.success) {
+      if (response.data.success && response.data.data) {
         setInstructors(
           instructors.map((instructor) =>
             instructor._id === instructorId
@@ -194,6 +200,7 @@ const ManageInstructor = () => {
       setIsModalOpen(false);
       setSelectedInstructor(null);
       setError("");
+      setSearchQuery("");
     }
   };
 
@@ -201,18 +208,47 @@ const ManageInstructor = () => {
     setSelectedInstructor(instructor);
   };
 
+  const filteredInstructors = instructors.filter((instructor) => {
+    if (!instructor) return false;
+    const fullName = `${instructor.firstName || ""} ${instructor.lastName || ""}`.toLowerCase().trim();
+    const email = (instructor.email || "").toLowerCase().trim();
+    const query = (searchQuery || "").toLowerCase().trim();
+    return fullName.includes(query) || email.includes(query);
+  });
+
   return (
     <div className="container mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6 mt-10">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left">
-          Manage Instructors
-        </h1>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="card-bg text-white shadow shadow-black px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
-        >
-          Enroll Instructor
-        </button>
+      <div className="mb-6 mt-10">
+        <div className="flex flex-row items-center justify-between sm:items-center sm:flex-row sm:gap-4">
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-800 text-left">
+            Manage Instructors
+          </h1>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="card-bg text-white shadow shadow-black px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+          >
+            Enroll Instructor
+          </button>
+        </div>
+        <div className="mt-4 flex justify-end sm:mt-0 sm:ml-4">
+          <div className="mt-3 relative w-full sm:w-64 md:w-100 lg:w-100">
+            <input
+              type="text"
+              placeholder="Search by name or email"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Error Message */}
@@ -225,8 +261,10 @@ const ManageInstructor = () => {
       {/* Loading State */}
       {loading ? (
         <Loading />
-      ) : instructors.length === 0 ? (
-        <div className="text-center text-gray-600">No instructors found.</div>
+      ) : filteredInstructors.length === 0 ? (
+        <div className="text-center text-gray-600">
+          {searchQuery ? "No instructors found matching your search." : "No instructors found."}
+        </div>
       ) : (
         <>
           {/* Enroll Modal */}
@@ -249,7 +287,7 @@ const ManageInstructor = () => {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       required
                     />
                   </div>
@@ -262,7 +300,7 @@ const ManageInstructor = () => {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       required
                     />
                   </div>
@@ -275,7 +313,7 @@ const ManageInstructor = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       required
                     />
                   </div>
@@ -288,7 +326,7 @@ const ManageInstructor = () => {
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       required
                       placeholder="Enter password (min 6 characters)"
                     />
@@ -302,7 +340,7 @@ const ManageInstructor = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     />
                   </div>
                   <div className="mb-4">
@@ -314,7 +352,7 @@ const ManageInstructor = () => {
                       name="avatar"
                       value={formData.avatar}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       placeholder="Optional image URL"
                     />
                   </div>
@@ -327,7 +365,7 @@ const ManageInstructor = () => {
                       name="expertise"
                       value={formData.expertise}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       placeholder="e.g., JavaScript, React"
                     />
                   </div>
@@ -339,7 +377,7 @@ const ManageInstructor = () => {
                       name="bio"
                       value={formData.bio}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       rows="3"
                     ></textarea>
                   </div>
@@ -352,7 +390,7 @@ const ManageInstructor = () => {
                       name="socialLinks.linkedin"
                       value={formData.socialLinks.linkedin}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       placeholder="Optional"
                     />
                   </div>
@@ -365,7 +403,7 @@ const ManageInstructor = () => {
                       name="socialLinks.twitter"
                       value={formData.socialLinks.twitter}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       placeholder="Optional"
                     />
                   </div>
@@ -377,7 +415,7 @@ const ManageInstructor = () => {
                       name="isActive"
                       value={formData.isActive}
                       onChange={handleInputChange}
-                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     >
                       <option value={true}>Active</option>
                       <option value={false}>Inactive</option>
@@ -387,13 +425,13 @@ const ManageInstructor = () => {
                     <button
                       type="button"
                       onClick={() => setIsModalOpen(false)}
-                      className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm sm:text-base"
+                      className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                     >
                       Enroll
                     </button>
@@ -411,99 +449,160 @@ const ManageInstructor = () => {
             >
               <div className="bg-white border-2 border-blue-400 rounded-lg p-4 sm:p-6 w-11/12 sm:w-3/4 md:w-1/2 lg:w-1/3 max-h-[80vh] overflow-y-auto">
                 <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800">
-                  {`${selectedInstructor.firstName} ${selectedInstructor.lastName}`} Details
+                  {`${selectedInstructor.firstName || "N/A"} ${selectedInstructor.lastName || "N/A"}`} Details
                 </h2>
-                <div className="space-y-2 text-sm sm:text-base text-gray-600">
-                  <p><strong>First Name:</strong> {selectedInstructor.firstName}</p>
-                  <p><strong>Last Name:</strong> {selectedInstructor.lastName}</p>
-                  <p><strong>Email:</strong> {selectedInstructor.email}</p>
-                  <p><strong>Phone:</strong> {selectedInstructor.phone || "N/A"}</p>
-                  <p>
-                    <strong>Avatar:</strong>{" "}
-                    {selectedInstructor.avatar ? (
-                      <img
-                        src={selectedInstructor.avatar}
-                        alt={`${selectedInstructor.firstName} ${selectedInstructor.lastName}`}
-                        className="w-10 h-10 rounded-full object-cover inline-block"
-                        onError={(e) => (e.target.src = "")}
-                      />
-                    ) : (
-                      "N/A"
-                    )}
-                  </p>
-                  <p>
-                    <strong>Expertise:</strong>{" "}
-                    {selectedInstructor.expertise?.join(", ") || "N/A"}
-                  </p>
-                  <p><strong>Total Courses:</strong> {selectedInstructor.totalCourses}</p>
-                  <p><strong>Bio:</strong> {selectedInstructor.bio || "N/A"}</p>
-                  <p>
-                    <strong>Social:</strong>{" "}
-                    {selectedInstructor.socialLinks ? (
-                      <span className="flex space-x-3">
-                        {selectedInstructor.socialLinks.linkedin && (
-                          <a
-                            href={selectedInstructor.socialLinks.linkedin}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline text-xs sm:text-sm"
-                          >
-                            LinkedIn
-                          </a>
-                        )}
-                        {selectedInstructor.socialLinks.twitter && (
-                          <a
-                            href={selectedInstructor.socialLinks.twitter}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 hover:underline text-xs sm:text-sm"
-                          >
-                            Twitter
-                          </a>
-                        )}
+                <div className="space-y-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <FaUser className="text-blue-500 text-sm" />
+                    <p><strong>First Name:</strong> {selectedInstructor.firstName || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaUser className="text-blue-500 text-sm" />
+                    <p><strong>Last Name:</strong> {selectedInstructor.lastName || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaEnvelope className="text-blue-500 text-sm" />
+                    <p><strong>Email:</strong> {selectedInstructor.email || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaPhone className="text-blue-500 text-sm" />
+                    <p><strong>Phone:</strong> {selectedInstructor.phone || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaImage className="text-blue-500 text-sm" />
+                    <p>
+                      <strong>Avatar:</strong>{" "}
+                      {selectedInstructor.avatar ? (
+                        <img
+                          src={selectedInstructor.avatar}
+                          alt={`${selectedInstructor.firstName || "N/A"} ${selectedInstructor.lastName || "N/A"}`}
+                          className="w-10 h-10 rounded-full object-cover inline-block"
+                          onError={(e) => (e.target.src = "")}
+                        />
+                      ) : (
+                        "N/A"
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCode className="text-blue-500 text-sm" />
+                    <p>
+                      <strong>Expertise:</strong>{" "}
+                      {selectedInstructor.expertise?.join(", ") || "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaBook className="text-blue-500 text-sm" />
+                    <p><strong>Total Courses:</strong> {selectedInstructor.totalCourses || 0}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaInfoCircle className="text-blue-500 text-sm" />
+                    <p><strong>Bio:</strong> {selectedInstructor.bio || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaLink className="text-blue-500 text-sm" />
+                    <p>
+                      <strong>Social:</strong>{" "}
+                      {selectedInstructor.socialLinks && (selectedInstructor.socialLinks.linkedin || selectedInstructor.socialLinks.twitter) ? (
+                        <span className="flex space-x-3">
+                          {selectedInstructor.socialLinks.linkedin && (
+                            <a
+                              href={selectedInstructor.socialLinks.linkedin}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline text-xs"
+                            >
+                              LinkedIn
+                            </a>
+                          )}
+                          {selectedInstructor.socialLinks.twitter && (
+                            <a
+                              href={selectedInstructor.socialLinks.twitter}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:underline text-xs"
+                            >
+                              Twitter
+                            </a>
+                          )}
+                        </span>
+                      ) : (
+                        "N/A"
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCheckCircle className="text-blue-500 text-sm" />
+                    <p>
+                      <strong>Status:</strong>{" "}
+                      <span
+                        className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                          selectedInstructor.isActive
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {selectedInstructor.isActive ? "Active" : "Inactive"}
                       </span>
-                    ) : (
-                      "N/A"
-                    )}
-                  </p>
-                  <p>
-                    <strong>Status:</strong>{" "}
-                    <span
-                      className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                        selectedInstructor.isActive
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {selectedInstructor.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </p>
-                  <p><strong>Role:</strong> {selectedInstructor.role}</p>
-                  <p><strong>Verified:</strong> {selectedInstructor.isVerified ? "Yes" : "No"}</p>
-                  <p><strong>Rating:</strong> {selectedInstructor.rating}</p>
-                  <p><strong>Total Students:</strong> {selectedInstructor.totalStudents}</p>
-                  <p><strong>Earnings:</strong> ${selectedInstructor.earnings}</p>
-                  <p><strong>Approved:</strong> {selectedInstructor.approved ? "Yes" : "No"}</p>
-                  <p>
-                    <strong>Created At:</strong>{" "}
-                    {new Date(selectedInstructor.createdAt).toLocaleString()}
-                  </p>
-                  <p>
-                    <strong>Updated At:</strong>{" "}
-                    {new Date(selectedInstructor.updatedAt).toLocaleString()}
-                  </p>
-                  <p>
-                    <strong>Last Login:</strong>{" "}
-                    {selectedInstructor.lastLogin
-                      ? new Date(selectedInstructor.lastLogin).toLocaleString()
-                      : "N/A"}
-                  </p>
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaUserTag className="text-blue-500 text-sm" />
+                    <p><strong>Role:</strong> {selectedInstructor.role || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaShieldAlt className="text-blue-500 text-sm" />
+                    <p><strong>Verified:</strong> {selectedInstructor.isVerified ? "Yes" : "No"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaStar className="text-blue-500 text-sm" />
+                    <p><strong>Rating:</strong> {selectedInstructor.rating || 0}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaUsers className="text-blue-500 text-sm" />
+                    <p><strong>Total Students:</strong> {selectedInstructor.totalStudents || 0}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaDollarSign className="text-blue-500 text-sm" />
+                    <p><strong>Earnings:</strong> ${selectedInstructor.earnings || 0}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCheck className="text-blue-500 text-sm" />
+                    <p><strong>Approved:</strong> {selectedInstructor.approved ? "Yes" : "No"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCalendarAlt className="text-blue-500 text-sm" />
+                    <p>
+                      <strong>Created At:</strong>{" "}
+                      {selectedInstructor.createdAt
+                        ? new Date(selectedInstructor.createdAt).toLocaleString()
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCalendarAlt className="text-blue-500 text-sm" />
+                    <p>
+                      <strong>Updated At:</strong>{" "}
+                      {selectedInstructor.updatedAt
+                        ? new Date(selectedInstructor.updatedAt).toLocaleString()
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaSignInAlt className="text-blue-500 text-sm" />
+                    <p>
+                      <strong>Last Login:</strong>{" "}
+                      {selectedInstructor.lastLogin
+                        ? new Date(selectedInstructor.lastLogin).toLocaleString()
+                        : "N/A"}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex justify-end mt-4 space-x-2">
                   <button
                     onClick={() => handleToggleStatus(selectedInstructor._id)}
                     disabled={toggleLoading[selectedInstructor._id]}
-                    className={`px-4 py-2 text-white rounded-lg text-sm sm:text-base ${
+                    className={`px-4 py-2 text-white rounded-lg text-sm ${
                       selectedInstructor.isActive
                         ? "bg-red-600 hover:bg-red-700"
                         : "bg-green-600 hover:bg-green-700"
@@ -517,7 +616,7 @@ const ManageInstructor = () => {
                   </button>
                   <button
                     onClick={() => setSelectedInstructor(null)}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
                   >
                     Close
                   </button>
@@ -533,73 +632,114 @@ const ManageInstructor = () => {
                 <thead className="bg-gray-200">
                   <tr>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
-                      Name
+                      <div className="flex items-center gap-2">
+                        <FaUser className="text-blue-500 text-sm" />
+                        Name
+                      </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
-                      Email
+                      <div className="flex items-center gap-2">
+                        <FaEnvelope className="text-blue-500 text-sm" />
+                        Email
+                      </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
-                      Phone
+                      <div className="flex items-center gap-2">
+                        <FaPhone className="text-blue-500 text-sm" />
+                        Phone
+                      </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
-                      Expertise
+                      <div className="flex items-center gap-2">
+                        <FaCode className="text-blue-500 text-sm" />
+                        Expertise
+                      </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
-                      Courses
+                      <div className="flex items-center gap-2">
+                        <FaBook className="text-blue-500 text-sm" />
+                        Courses
+                      </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
-                      Status
+                      <div className="flex items-center gap-2">
+                        <FaCheckCircle className="text-blue-500 text-sm" />
+                        Status
+                      </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
-                      Action
+                      <div className="flex items-center gap-2">
+                        <FaCog className="text-blue-500 text-sm" />
+                        Action
+                      </div>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {instructors.map((instructor) => (
+                  {filteredInstructors.map((instructor) => (
                     <tr
-                      key={instructor._id}
+                      key={instructor._id || Math.random()}
                       className="border-b hover:bg-gray-100 transition-colors"
                     >
-                      <td className="py-4 px-6 flex items-center space-x-3">
-                        <img
-                          src={
-                            instructor.avatar ||
-                            "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"
-                          }
-                          alt={`${instructor.firstName} ${instructor.lastName}`}
-                          className="w-10 h-10 rounded-full object-cover"
-                          onError={(e) => (e.target.src = "")}
-                        />
-                        <span className="text-sm text-gray-800 font-medium">{`${instructor.firstName} ${instructor.lastName}`}</span>
+                      <td className="py-4 px-6 text-sm text-gray-800 font-medium">
+                        <div className="flex items-center gap-2">
+                          
+                          <div className="flex items-center space-x-3">
+                            <img
+                              src={
+                                instructor.avatar ||
+                                "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"
+                              }
+                              alt={`${instructor.firstName || "N/A"} ${instructor.lastName || "N/A"}`}
+                              className="w-10 h-10 rounded-full object-cover"
+                              onError={(e) => (e.target.src = "")}
+                            />
+                            <span>{`${instructor.firstName || "N/A"} ${instructor.lastName || "N/A"}`}</span>
+                          </div>
+                        </div>
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                        {instructor.email}
+                        <div className="flex items-center gap-2">
+                          
+                          {instructor.email || "N/A"}
+                        </div>
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                        {instructor.phone || "N/A"}
+                        <div className="flex items-center gap-2">
+                         
+                          {instructor.phone || "N/A"}
+                        </div>
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                        {instructor.expertise?.join(", ") || "N/A"}
+                        <div className="flex items-center gap-2">
+                         
+                          {instructor.expertise?.join(", ") || "N/A"}
+                        </div>
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                        {instructor.totalCourses}
+                        <div className="flex items-center gap-2">
+                         
+                          {instructor.totalCourses || 0}
+                        </div>
                       </td>
                       <td className="py-4 px-6 text-sm">
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                            instructor.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {instructor.isActive ? "Active" : "Inactive"}
-                        </span>
+                        <div className="flex items-center gap-2">
+                        
+                          <span
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                              instructor.isActive
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {instructor.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </div>
                       </td>
                       <td className="py-4 px-6 text-sm">
                         <button
                           onClick={() => openDetailsPopup(instructor)}
-                          className="card-bg shadow shadow-black text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                          className="card-bg shadow shadow-black text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs"
                         >
                           More
                         </button>
@@ -613,46 +753,68 @@ const ManageInstructor = () => {
 
           {/* Mobile Card Layout */}
           <div className="sm:hidden space-y-4">
-            {instructors.map((instructor) => (
+            {filteredInstructors.map((instructor) => (
               <div
-                key={instructor._id}
+                key={instructor._id || Math.random()}
                 className="bg-white rounded-lg shadow-md p-4 border border-gray-200"
               >
-                <div className="flex items-center space-x-3 mb-3">
-                  <img
-                    src={
-                      instructor.avatar ||
-                      "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"
-                    }
-                    alt={`${instructor.firstName} ${instructor.lastName}`}
-                    className="w-12 h-12 rounded-full object-cover"
-                    onError={(e) => (e.target.src = "")}
-                  />
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800">{`${instructor.firstName} ${instructor.lastName}`}</h3>
-                    <span
-                      className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                        instructor.isActive
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {instructor.isActive ? "Active" : "Inactive"}
-                    </span>
+                <div className="mb-3">
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src={
+                        instructor.avatar ||
+                        "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"
+                      }
+                      alt={`${instructor.firstName || "N/A"} ${instructor.lastName || "N/A"}`}
+                      className="w-12 h-12 rounded-full object-cover"
+                      onError={(e) => (e.target.src = "")}
+                    />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {`${instructor.firstName || "N/A"} ${instructor.lastName || "N/A"}`}
+                        </h3>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                       
+                        <span
+                          className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                            instructor.isActive
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {instructor.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-2 text-sm text-gray-600">
-                  <p><strong>Email:</strong> {instructor.email}</p>
-                  <p><strong>Phone:</strong> {instructor.phone || "N/A"}</p>
-                  <p>
-                    <strong>Expertise:</strong>{" "}
-                    {instructor.expertise?.join(", ") || "N/A"}
-                  </p>
-                  <p><strong>Courses:</strong> {instructor.totalCourses}</p>
+                  <div className="flex items-center gap-2">
+                    <FaEnvelope className="text-blue-500 text-sm" />
+                    <p><strong>Email:</strong> {instructor.email || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaPhone className="text-blue-500 text-sm" />
+                    <p><strong>Phone:</strong> {instructor.phone || "N/A"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCode className="text-blue-500 text-sm" />
+                    <p>
+                      <strong>Expertise:</strong>{" "}
+                      {instructor.expertise?.join(", ") || "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaBook className="text-blue-500 text-sm" />
+                    <p><strong>Courses:</strong> {instructor.totalCourses || 0}</p>
+                  </div>
                   <div className="mt-3">
                     <button
                       onClick={() => openDetailsPopup(instructor)}
-                      className="shadow shadow-black card-bg text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                      className="shadow shadow-black card-bg text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs"
                     >
                       More
                     </button>

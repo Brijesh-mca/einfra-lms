@@ -251,19 +251,7 @@ const AdminSettings = () => {
             />
           </div>
 
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700">
-              Avatar URL
-            </label>
-            <input
-              name="avatar"
-              value={formData.avatar}
-              onChange={handleChange}
-              disabled={!editable}
-              placeholder="Avatar URL"
-              className="mt-1 block w-full px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 text-xs sm:text-sm"
-            />
-          </div>
+          
         </div>
 
         {/* Email Section */}
