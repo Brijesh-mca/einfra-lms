@@ -8,15 +8,15 @@ const Notification = ({ message, type, onClose }) => {
 
   return (
     <div
-      className={`fixed top-2 sm:top-4 right-2 sm:right-4 p-3 sm:p-4 rounded-md shadow-lg text-white ${
-        type === "error" ? "bg-red-500" : "bg-green-500"
-      } transition-opacity duration-300 z-[1000] max-w-[90%] sm:max-w-md`}
+      className={`fixed top-4 right-4 p-4 rounded-lg shadow-2xl text-white ${
+        type === "error" ? "bg-red-600" : "bg-green-600"
+      } transition-opacity duration-300 z-[1000] max-w-[90%] sm:max-w-md animate-fade-in`}
     >
       <div className="flex items-center justify-between">
-        <span className="text-sm sm:text-base">{message}</span>
+        <span className="text-sm font-medium">{message}</span>
         <button
           onClick={onClose}
-          className="ml-2 sm:ml-4 text-white hover:text-gray-200"
+          className="ml-4 text-white hover:text-gray-200 transition"
           aria-label="Close notification"
         >
           ✕
@@ -41,9 +41,9 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="text-center text-red-500 p-4 sm:p-6">
-          <h1 className="text-lg sm:text-xl md:text-2xl">Something went wrong.</h1>
-          <p className="text-sm sm:text-base">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
+          <h1 className="text-2xl font-bold text-red-600">Something went wrong.</h1>
+          <p className="text-base text-gray-600 mt-2">
             {this.state.error?.message || "Please try again later."}
           </p>
         </div>
@@ -53,12 +53,11 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-const Contents = () => {
+const CourseManagement = () => {
   const { state } = useLocation();
   const { courseId } = useParams();
   const navigate = useNavigate();
 
-  // Initialize courseDetails with data from state if available
   const initialCourseDetails = {
     title: state?.courseTitle || "",
     subtitle: state?.subtitle || "",
@@ -79,13 +78,11 @@ const Contents = () => {
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const [promoVideoPreview, setPromoVideoPreview] = useState(null);
 
-  // Show notification
   const showNotification = (message, type = "error") => {
     setNotification({ message, type });
     setTimeout(() => setNotification({ message: "", type: "" }), 5000);
   };
 
-  // Update course details
   const handleUpdateCourseDetails = async () => {
     if (!courseDetails.title.trim()) {
       showNotification("Course title is required.");
@@ -121,7 +118,6 @@ const Contents = () => {
     }
   };
 
-  // Delete course
   const handleDeleteCourse = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -153,7 +149,6 @@ const Contents = () => {
     }
   };
 
-  // Upload thumbnail
   const handleThumbnailUpload = async () => {
     if (!thumbnailFile) {
       showNotification("Please select a thumbnail file.");
@@ -193,7 +188,6 @@ const Contents = () => {
     }
   };
 
-  // Upload promo video
   const handlePromoVideoUpload = async () => {
     if (!promoVideoFile) {
       showNotification("Please select a promo video file.");
@@ -233,7 +227,6 @@ const Contents = () => {
     }
   };
 
-  // Update course status
   const handleStatusChange = async (e) => {
     const newStatus = e.target.value;
     try {
@@ -266,7 +259,6 @@ const Contents = () => {
     }
   };
 
-  // Handle thumbnail file selection with preview
   const handleThumbnailChange = (e) => {
     const file = e.target.files[0];
     setThumbnailFile(file);
@@ -278,7 +270,6 @@ const Contents = () => {
     }
   };
 
-  // Handle promo video file selection with preview
   const handlePromoVideoChange = (e) => {
     const file = e.target.files[0];
     setPromoVideoFile(file);
@@ -290,7 +281,6 @@ const Contents = () => {
     }
   };
 
-  // Clean up preview URLs to prevent memory leaks
   useEffect(() => {
     return () => {
       if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
@@ -300,69 +290,72 @@ const Contents = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-100 px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">
+      <div className="bg-gray-50 py-6 px-4 sm:px-6 md:px-8 lg:px-12">
         <Notification
           message={notification.message}
           type={notification.type}
           onClose={() => setNotification({ message: "", type: "" })}
         />
-        <h1 className="!text-[2rem] md:text-3xl font-bold text-slate-900 mb-3 sm:mb-4 text-left">
-          Update your courses
-        </h1>
+        <div className="max-w-7xl mx-auto sm:w-full">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center sm:text-left">
+            Manage Your Course
+          </h1>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 pl-1 sm:pl-2">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
-            <h2 className="text-base sm:text-lg md:text-xl font-semibold text-slate-800">
-              {courseDetails.title || "Untitled Course"}
-            </h2>
-            <span className="text-xs sm:text-sm md:text-base text-gray-600">
-              (Status: {status})
-            </span>
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-center sm:text-left">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                  {courseDetails.title || "Untitled Course"}
+                </h2>
+                <span className="text-sm text-gray-500">
+                  (Status: {status.charAt(0).toUpperCase() + status.slice(1)})
+                </span>
+              </div>
+              <div className="flex flex-wrap justify-center sm:justify-end gap-3 mt-4 sm:mt-0">
+                <button
+                  onClick={() => setIsTitleModalOpen(true)}
+                  className="py-2 px-4 rounded-lg bg-gray-200 text-gray-800 text-sm font-medium hover:bg-gray-300 transition"
+                >
+                  Edit Details
+                </button>
+                <button
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  className="py-2 px-4 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition"
+                >
+                  Delete Course
+                </button>
+                <select
+                  value={status}
+                  onChange={handleStatusChange}
+                  className="py-2 px-4 rounded-lg bg-[#49BBBD] text-white text-sm font-medium hover:bg-[#3a9a9b] transition focus:ring-2 focus:ring-[#49BBBD] focus:outline-none"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2 sm:gap-3 mt-3 sm:mt-0">
-            <button
-              onClick={() => setIsTitleModalOpen(true)}
-              className="py-1.5 px-3 sm:px-4 rounded bg-gray-200 text-gray-800 text-sm sm:text-base hover:bg-gray-300 transition cursor-pointer"
-            >
-              Edit Course Details
-            </button>
-            <button
-              onClick={() => setIsDeleteModalOpen(true)}
-              className="py-1.5 px-3 sm:px-4 rounded bg-red-500 text-white text-sm sm:text-base hover:bg-red-600 transition cursor-pointer"
-            >
-              Delete Course
-            </button>
-            <select
-              value={status}
-              onChange={handleStatusChange}
-              className="py-1.5 px-3 sm:px-4 rounded bg-[#49BBBD] outline-none border-none text-white text-sm sm:text-base hover:bg-[#3a9a9b] transition cursor-pointer"
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="archived">Archived</option>
-            </select>
-          </div>
-        </div>
 
-        <div className="mb-4 sm:mb-6">
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Upload Thumbnail
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Upload Thumbnail</h3>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Choose Thumbnail
               </label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleThumbnailChange}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-[#49BBBD] file:text-white hover:file:bg-[#3a9a9b]"
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#49BBBD] file:text-white hover:file:bg-[#3a9a9b]"
               />
               {thumbnailPreview && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600">Thumbnail Preview:</p>
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600 mb-2">Thumbnail Preview:</p>
                   <img
                     src={thumbnailPreview}
                     alt="Thumbnail Preview"
-                    className="mt-1 max-w-full h-auto rounded-md shadow-md"
+                    className="max-w-full h-auto rounded-md shadow-md mx-auto sm:mx-0"
                     style={{ maxHeight: "200px" }}
                   />
                 </div>
@@ -370,28 +363,29 @@ const Contents = () => {
               <button
                 onClick={handleThumbnailUpload}
                 disabled={!thumbnailFile}
-                className="mt-2 py-1.5 px-3 sm:px-4 rounded bg-[#49BBBD] text-white text-sm sm:text-base hover:bg-[#3a9a9b] disabled:bg-gray-400 disabled:cursor-not-allowed transition cursor-pointer"
+                className="mt-4 py-2 px-4 rounded-lg bg-[#49BBBD] text-white text-sm font-medium hover:bg-[#3a9a9b] disabled:bg-gray-400 disabled:cursor-not-allowed transition w-full sm:w-auto"
               >
                 Upload Thumbnail
               </button>
             </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Upload Promo Video
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Upload Promo Video</h3>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Choose Promo Video
               </label>
               <input
                 type="file"
                 accept="video/*"
                 onChange={handlePromoVideoChange}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-[#49BBBD] file:text-white hover:file:bg-[#3a9a9b]"
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#49BBBD] file:text-white hover:file:bg-[#3a9a9b]"
               />
               {promoVideoPreview && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600">Promo Video Preview:</p>
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600 mb-2">Promo Video Preview:</p>
                   <video
                     src={promoVideoPreview}
                     controls
-                    className="mt-1 max-w-full h-auto rounded-md shadow-md"
+                    className="max-w-full h-auto rounded-md shadow-md mx-auto sm:mx-0"
                     style={{ maxHeight: "200px" }}
                   />
                 </div>
@@ -399,122 +393,150 @@ const Contents = () => {
               <button
                 onClick={handlePromoVideoUpload}
                 disabled={!promoVideoFile}
-                className="mt-2 py-1.5 px-3 sm:px-4 rounded bg-[#49BBBD] text-white text-sm sm:text-base hover:bg-[#3a9a9b] disabled:bg-gray-400 disabled:cursor-not-allowed transition cursor-pointer"
+                className="mt-4 py-2 px-4 rounded-lg bg-[#49BBBD] text-white text-sm font-medium hover:bg-[#3a9a9b] disabled:bg-gray-400 disabled:cursor-not-allowed transition w-full sm:w-auto"
               >
                 Upload Promo Video
               </button>
             </div>
           </div>
+
+          {isTitleModalOpen && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg shadow-xl w-[90%] max-w-lg p-4 sm:p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Edit Course Details</h3>
+                <div className="space-y-4 overflow-y-auto max-h-[70vh]">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Course Title
+                    </label>
+                    <input
+                      className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#49BBBD] focus:border-transparent outline-none transition"
+                      placeholder="Enter Course Title"
+                      value={courseDetails.title}
+                      onChange={(e) =>
+                        setCourseDetails({ ...courseDetails, title: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Subtitle
+                    </label>
+                    <input
+                      className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#49BBBD] focus:border-transparent outline-none transition"
+                      placeholder="Enter Subtitle"
+                      value={courseDetails.subtitle}
+                      onChange={(e) =>
+                        setCourseDetails({ ...courseDetails, subtitle: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description
+                    </label>
+                    <textarea
+                      className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#49BBBD] focus:border-transparent outline-none transition"
+                      placeholder="Enter Description"
+                      rows="4"
+                      value={courseDetails.description}
+                      onChange={(e) =>
+                        setCourseDetails({ ...courseDetails, description: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Category
+                    </label>
+                    <input
+                      className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#49BBBD] focus:border-transparent outline-none transition"
+                      placeholder="Enter Category"
+                      value={courseDetails.category}
+                      onChange={(e) =>
+                        setCourseDetails({ ...courseDetails, category: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Subcategory
+                    </label>
+                    <input
+                      className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#49BBBD] focus:border-transparent outline-none transition"
+                      placeholder="Enter Subcategory"
+                      value={courseDetails.subCategory}
+                      onChange={(e) =>
+                        setCourseDetails({ ...courseDetails, subCategory: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Level
+                    </label>
+                    <select
+                      className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#49BBBD] focus:border-transparent outline-none transition"
+                      value={courseDetails.level}
+                      onChange={(e) =>
+                        setCourseDetails({ ...courseDetails, level: e.target.value })
+                      }
+                    >
+                      <option value="">Select Level</option>
+                      <option value="beginner">Beginner</option>
+                      <option value="intermediate">Intermediate</option>
+                      <option value="advanced">Advanced</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 mt-6">
+                  <button
+                    onClick={handleUpdateCourseDetails}
+                    disabled={!courseDetails.title.trim()}
+                    className="py-2 px-4 rounded-lg bg-[#49BBBD] text-white text-sm font-medium hover:bg-[#3a9a9b] disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                  >
+                    Update
+                  </button>
+                  <button
+                    onClick={() => setIsTitleModalOpen(false)}
+                    className="py-2 px-4 rounded-lg bg-gray-200 text-gray-800 text-sm font-medium hover:bg-gray-300 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isDeleteModalOpen && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg shadow-xl w-[90%] max-w-md p-4 sm:p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Confirm Delete Course</h3>
+                <p className="text-sm text-gray-600 mb-6">
+                  Are you sure you want to delete this course? This action cannot be undone.
+                </p>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={handleDeleteCourse}
+                    className="py-2 px-4 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => setIsDeleteModalOpen(false)}
+                    className="py-2 px-4 rounded-lg bg-gray-200 text-gray-800 text-sm font-medium hover:bg-gray-300 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
         </div>
 
-        {isTitleModalOpen && (
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-[90%] max-w-xs sm:max-w-sm md:max-w-md p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-800">
-                Edit Course Details
-              </h3>
-              <div className="space-y-3">
-                <input
-                  className="w-full border border-gray-300 outline-none p-2 sm:p-3 rounded text-sm sm:text-base focus:ring-2 focus:ring-[#49BBBD] focus:border-transparent transition"
-                  placeholder="Enter Course Title"
-                  value={courseDetails.title}
-                  onChange={(e) =>
-                    setCourseDetails({ ...courseDetails, title: e.target.value })
-                  }
-                />
-                <input
-                  className="w-full border border-gray-300 outline-none p-2 sm:p-3 rounded text-sm sm:text-base focus:ring-2 focus:ring-[#49BBBD] focus:border-transparent transition"
-                  placeholder="Enter Subtitle"
-                  value={courseDetails.subtitle}
-                  onChange={(e) =>
-                    setCourseDetails({ ...courseDetails, subtitle: e.target.value })
-                  }
-                />
-                <textarea
-                  className="w-full border border-gray-300 outline-none p-2 sm:p-3 rounded text-sm sm:text-base focus:ring-2 focus:ring-[#49BBBD] focus:border-transparent transition"
-                  placeholder="Enter Description"
-                  value={courseDetails.description}
-                  onChange={(e) =>
-                    setCourseDetails({ ...courseDetails, description: e.target.value })
-                  }
-                />
-                <input
-                  className="w-full border border-gray-300 outline-none p-2 sm:p-3 rounded text-sm sm:text-base focus:ring-2 focus:ring-[#49BBBD] focus:border-transparent transition"
-                  placeholder="Enter Category"
-                  value={courseDetails.category}
-                  onChange={(e) =>
-                    setCourseDetails({ ...courseDetails, category: e.target.value })
-                  }
-                />
-                <input
-                  className="w-full border border-gray-300 outline-none p-2 sm:p-3 rounded text-sm sm:text-base focus:ring-2 focus:ring-[#49BBBD] focus:border-transparent transition"
-                  placeholder="Enter Subcategory"
-                  value={courseDetails.subCategory}
-                  onChange={(e) =>
-                    setCourseDetails({ ...courseDetails, subCategory: e.target.value })
-                  }
-                />
-                <select
-                  className="w-full border border-gray-300 outline-none p-2 sm:p-3 rounded text-sm sm:text-base focus:ring-2 focus:ring-[#49BBBD] focus:border-transparent transition"
-                  value={courseDetails.level}
-                  onChange={(e) =>
-                    setCourseDetails({ ...courseDetails, level: e.target.value })
-                  }
-                >
-                  <option value="">Select Level</option>
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="advanced">Advanced</option>
-                </select>
-              </div>
-              <div className="flex justify-end gap-2 sm:gap-3 mt-4">
-                <button
-                  onClick={handleUpdateCourseDetails}
-                  disabled={!courseDetails.title.trim()}
-                  className="py-1.5 px-3 sm:px-4 rounded bg-[#49BBBD] text-white text-sm sm:text-base hover:bg-[#3a9a9b] disabled:bg-gray-400 disabled:cursor-not-allowed transition cursor-pointer"
-                >
-                  Update
-                </button>
-                <button
-                  onClick={() => setIsTitleModalOpen(false)}
-                  className="py-1.5 px-3 sm:px-4 rounded bg-gray-200 text-gray-800 text-sm sm:text-base hover:bg-gray-300 transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isDeleteModalOpen && (
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-[90%] max-w-xs sm:max-w-sm md:max-w-md p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-800">
-                Confirm Delete Course
-              </h3>
-              <p className="text-sm sm:text-base text-gray-600 mb-4">
-                Are you sure you want to delete this course? This action cannot be undone.
-              </p>
-              <div className="flex justify-end gap-2 sm:gap-3">
-                <button
-                  onClick={handleDeleteCourse}
-                  className="py-1.5 px-3 sm:px-4 rounded bg-red-500 text-white text-sm sm:text-base hover:bg-red-600 transition cursor-pointer"
-                >
-                  Delete
-                </button>
-                <button
-                  onClick={() => setIsDeleteModalOpen(false)}
-                  className="py-1.5 px-3 sm:px-4 rounded bg-gray-200 text-gray-800 text-sm sm:text-base hover:bg-gray-300 transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </ErrorBoundary>
-  );
+      </ErrorBoundary>
+    );
 };
 
-export default Contents;
+export default CourseManagement;
