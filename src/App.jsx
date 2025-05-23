@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
 import ProtectedRoute from './ProtectedRoute';
@@ -21,12 +21,31 @@ import { useAuth } from './AuthContext';
 // Child component to ensure useAuth is called inside AuthProvider
 function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showMenuButton, setShowMenuButton] = useState(true);
   const location = useLocation();
   const { isAuthenticated } = useAuth();
 
   // Hide sidebar on login page
   const isLoginPage = location.pathname === '/login';
   const showSidebar = isAuthenticated && !isLoginPage;
+
+  // Handle scroll to show/hide menu button
+  useEffect(() => {
+    let scrollTimeout;
+    const handleScroll = () => {
+      setShowMenuButton(false); // Hide button when scrolling starts
+      clearTimeout(scrollTimeout); // Clear previous timeout
+      scrollTimeout = setTimeout(() => {
+        setShowMenuButton(true); // Show button when scrolling stops
+      }, 150); // Adjust delay as needed
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen flex bg-gray-50 ">
@@ -52,11 +71,11 @@ function AppContent() {
             />
           )}
 
-          {/* Mobile Toggle Button - Only show when sidebar is closed */}
-          {!sidebarOpen && (
+          {/* Mobile Toggle Button - Only show when sidebar is closed and not scrolling */}
+          {!sidebarOpen && showMenuButton && (
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border rounded shadow-md"
+              className="lg:hidden fixed top-4 right-4 z-50 p-2 bg-white rounded shadow-md"
             >
               <Menu />
             </button>
