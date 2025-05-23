@@ -69,7 +69,7 @@ const Memberships = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <h1 className="text-3xl font-bold text-red-500 mb-6 text-center">Enrollment Analytics</h1>
+      <h1 className="text-3xl font-bold clr 500 mb-6 text-center">All Enrollment </h1>
       <p className="text-gray-600 mb-8 text-center">
         View enrollment details for your courses.
       </p>
