@@ -8,11 +8,17 @@ const Card = ({ children }) => (
   <div className="bg-white rounded-2xl shadow-lg p-6 w-full">{children}</div>
 );
 
+
 const InfoCard = ({ title, value, link, to }) => (
-  <Card className="flex flex-col items-center justify-center">
-    <h3 className="text-sm text-gray-500 mb-1">{title}</h3>
-    <div className="text-3xl font-bold">{value}</div>
-    <Link to={to} className="text-sm  text-teal-500 block mt-4 hover:underline">
+  <Card className="flex flex-col items-center justify-between h-[100px] p-4">
+    <div className="flex flex-col  h-[100px]">
+      <h3 className="text-sm text-gray-500 mb-1">{title}</h3>
+      <div className="text-3xl font-bold">{value}</div>
+    </div>
+    <Link
+      to={to}
+      className="text-sm text-teal-500 mt-2 hover:underline  border-gray-200 pt-1 w-full text-center"
+    >
       {link} →
     </Link>
   </Card>
