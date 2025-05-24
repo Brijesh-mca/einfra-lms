@@ -12,7 +12,7 @@ const InfoCard = ({ title, value, link, to }) => (
   <Card className="flex flex-col items-center justify-center">
     <h3 className="text-sm text-gray-500 mb-1">{title}</h3>
     <div className="text-3xl font-bold">{value}</div>
-    <Link to={to} className="text-sm text-teal-500 block mt-4 hover:underline">
+    <Link to={to} className="text-sm  text-teal-500 block mt-4 hover:underline">
       {link} →
     </Link>
   </Card>
@@ -233,7 +233,7 @@ export default function Dashboard() {
   return (
     <div className="p-6 mt-5 space-y-6 bg-gray-50 min-h-screen">
       {/* Info Cards */}
-      <div className="grid grid-cols-1 bg-red-200 h-50 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1  md:grid-cols-2 gap-4">
         <InfoCard
           title="Revenues"
           value={formatCurrency(totalRevenue)}
