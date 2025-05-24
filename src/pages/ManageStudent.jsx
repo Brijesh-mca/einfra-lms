@@ -614,7 +614,7 @@ const ManageStudent = () => {
                             <img
                               src={
                                 student.avatar ||
-                                "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"
+                                "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
                               }
                               alt={`${student.firstName || "N/A"} ${
                                 student.lastName || "N/A"
@@ -678,7 +678,7 @@ const ManageStudent = () => {
                     <img
                       src={
                         student.avatar ||
-                        "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"
+                        "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
                       }
                       alt={`${student.firstName || "N/A"} ${
                         student.lastName || "N/A"

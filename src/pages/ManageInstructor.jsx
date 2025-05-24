@@ -688,7 +688,7 @@ const ManageInstructor = () => {
                             <img
                               src={
                                 instructor.avatar ||
-                                "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"
+                                "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
                               }
                               alt={`${instructor.firstName || "N/A"} ${instructor.lastName || "N/A"}`}
                               className="w-10 h-10 rounded-full object-cover"
@@ -763,7 +763,7 @@ const ManageInstructor = () => {
                     <img
                       src={
                         instructor.avatar ||
-                        "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"
+                        "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
                       }
                       alt={`${instructor.firstName || "N/A"} ${instructor.lastName || "N/A"}`}
                       className="w-12 h-12 rounded-full object-cover"
