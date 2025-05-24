@@ -635,7 +635,10 @@ const ManageStudent = () => {
                         {student.phone || "N/A"}
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                        {student.skills[0]}{student.skills[1]}{student.skills[2] || "N/A"}
+                         <div className="flex items-center gap-2">
+                         
+                          {student.skills?.join(", ") || "N/A"}
+                        </div>
                       </td>
                       <td className="py-4 px-6 text-sm">
                         <span
@@ -723,15 +726,8 @@ const ManageStudent = () => {
                   <div className="flex items-center gap-2">
                     <FaCode className="clr text-sm" />
                     <p>
-                      <strong>Skills:</strong>
-                      {student.skills.map((skill, index) => (
-                        <span
-                          key={index}
-                          className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-1"
-                        >
-                          {skill || "N/A"}
-                        </span>
-                      ))}
+                      <strong>Skills: </strong>
+                      {student.skills?.join(", ") || "N/A"}
                       
                     </p>
                   </div>

@@ -453,23 +453,23 @@ const ManageInstructor = () => {
                 </h2>
                 <div className="space-y-2 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
-                    <FaUser className="text-blue-500 text-sm" />
+                    <FaUser className="clr text-sm" />
                     <p><strong>First Name:</strong> {selectedInstructor.firstName || "N/A"}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaUser className="text-blue-500 text-sm" />
+                    <FaUser className="clr text-sm" />
                     <p><strong>Last Name:</strong> {selectedInstructor.lastName || "N/A"}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaEnvelope className="text-blue-500 text-sm" />
+                    <FaEnvelope className="clr text-sm" />
                     <p><strong>Email:</strong> {selectedInstructor.email || "N/A"}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaPhone className="text-blue-500 text-sm" />
+                    <FaPhone className="clr text-sm" />
                     <p><strong>Phone:</strong> {selectedInstructor.phone || "N/A"}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaImage className="text-blue-500 text-sm" />
+                    <FaImage className="clr text-sm" />
                     <p>
                       <strong>Avatar:</strong>{" "}
                       {selectedInstructor.avatar ? (
@@ -485,22 +485,22 @@ const ManageInstructor = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaCode className="text-blue-500 text-sm" />
+                    <FaCode className="clr text-sm" />
                     <p>
                       <strong>Expertise:</strong>{" "}
                       {selectedInstructor.expertise?.join(", ") || "N/A"}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaBook className="text-blue-500 text-sm" />
+                    <FaBook className="clr text-sm" />
                     <p><strong>Total Courses:</strong> {selectedInstructor.totalCourses || 0}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaInfoCircle className="text-blue-500 text-sm" />
+                    <FaInfoCircle className="clr text-sm" />
                     <p><strong>Bio:</strong> {selectedInstructor.bio || "N/A"}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaLink className="text-blue-500 text-sm" />
+                    <FaLink className="clr text-sm" />
                     <p>
                       <strong>Social:</strong>{" "}
                       {selectedInstructor.socialLinks && (selectedInstructor.socialLinks.linkedin || selectedInstructor.socialLinks.twitter) ? (
@@ -532,7 +532,7 @@ const ManageInstructor = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaCheckCircle className="text-blue-500 text-sm" />
+                    <FaCheckCircle className="clr text-sm" />
                     <p>
                       <strong>Status:</strong>{" "}
                       <span
@@ -547,31 +547,31 @@ const ManageInstructor = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaUserTag className="text-blue-500 text-sm" />
+                    <FaUserTag className="clr text-sm" />
                     <p><strong>Role:</strong> {selectedInstructor.role || "N/A"}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaShieldAlt className="text-blue-500 text-sm" />
+                    <FaShieldAlt className="clr text-sm" />
                     <p><strong>Verified:</strong> {selectedInstructor.isVerified ? "Yes" : "No"}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaStar className="text-blue-500 text-sm" />
+                    <FaStar className="clr text-sm" />
                     <p><strong>Rating:</strong> {selectedInstructor.rating || 0}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaUsers className="text-blue-500 text-sm" />
+                    <FaUsers className="clr text-sm" />
                     <p><strong>Total Students:</strong> {selectedInstructor.totalStudents || 0}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaDollarSign className="text-blue-500 text-sm" />
+                    <FaDollarSign className="clr text-sm" />
                     <p><strong>Earnings:</strong> ${selectedInstructor.earnings || 0}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaCheck className="text-blue-500 text-sm" />
+                    <FaCheck className="clr text-sm" />
                     <p><strong>Approved:</strong> {selectedInstructor.approved ? "Yes" : "No"}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaCalendarAlt className="text-blue-500 text-sm" />
+                    <FaCalendarAlt className="clr text-sm" />
                     <p>
                       <strong>Created At:</strong>{" "}
                       {selectedInstructor.createdAt
@@ -580,7 +580,7 @@ const ManageInstructor = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaCalendarAlt className="text-blue-500 text-sm" />
+                    <FaCalendarAlt className="clr text-sm" />
                     <p>
                       <strong>Updated At:</strong>{" "}
                       {selectedInstructor.updatedAt
@@ -589,7 +589,7 @@ const ManageInstructor = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaSignInAlt className="text-blue-500 text-sm" />
+                    <FaSignInAlt className="clr text-sm" />
                     <p>
                       <strong>Last Login:</strong>{" "}
                       {selectedInstructor.lastLogin
@@ -633,43 +633,43 @@ const ManageInstructor = () => {
                   <tr>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
-                        <FaUser className="text-blue-500 text-sm" />
+                        <FaUser className="clr text-sm" />
                         Name
                       </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
-                        <FaEnvelope className="text-blue-500 text-sm" />
+                        <FaEnvelope className="clr text-sm" />
                         Email
                       </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
-                        <FaPhone className="text-blue-500 text-sm" />
+                        <FaPhone className="clr text-sm" />
                         Phone
                       </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
-                        <FaCode className="text-blue-500 text-sm" />
+                        <FaCode className="clr text-sm" />
                         Expertise
                       </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
-                        <FaBook className="text-blue-500 text-sm" />
+                        <FaBook className="clr text-sm" />
                         Courses
                       </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
-                        <FaCheckCircle className="text-blue-500 text-sm" />
+                        <FaCheckCircle className="clr text-sm" />
                         Status
                       </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
-                        <FaCog className="text-blue-500 text-sm" />
+                        <FaCog className="clr text-sm" />
                         Action
                       </div>
                     </th>
@@ -793,22 +793,22 @@ const ManageInstructor = () => {
                 </div>
                 <div className="space-y-2 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
-                    <FaEnvelope className="text-blue-500 text-sm" />
+                    <FaEnvelope className="clr text-sm" />
                     <p><strong>Email:</strong> {instructor.email || "N/A"}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaPhone className="text-blue-500 text-sm" />
+                    <FaPhone className="clr text-sm" />
                     <p><strong>Phone:</strong> {instructor.phone || "N/A"}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaCode className="text-blue-500 text-sm" />
+                    <FaCode className="clr text-sm" />
                     <p>
                       <strong>Expertise:</strong>{" "}
                       {instructor.expertise?.join(", ") || "N/A"}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaBook className="text-blue-500 text-sm" />
+                    <FaBook className="clr text-sm" />
                     <p><strong>Courses:</strong> {instructor.totalCourses || 0}</p>
                   </div>
                   <div className="mt-3">
