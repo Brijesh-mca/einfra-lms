@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import Loading from "../Loading";
+import Loading from '../../Loading';
 
 export default function StudentActivity() {
   const [students, setStudents] = useState([]);
@@ -38,7 +38,7 @@ export default function StudentActivity() {
         const axiosInstance = axios.create({
           baseURL: 'https://lms-backend-flwq.onrender.com/api/v1/admin/analytics',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         });
@@ -48,7 +48,6 @@ export default function StudentActivity() {
           `/student-activity?limit=${limit}&sort=${sortParam}`
         );
         const data = response.data.data;
-        console.log('Student data:', data); // Debug
 
         const mappedStudents = data.map((stud) => ({
           id: stud._id,
@@ -58,7 +57,6 @@ export default function StudentActivity() {
           createdAt: stud.createdAt || new Date().toISOString(),
         }));
 
-        // Client-side sorting as fallback
         const sortedStudents = mappedStudents.sort((a, b) => {
           const dateA = new Date(a.createdAt);
           const dateB = new Date(b.createdAt);
@@ -69,10 +67,11 @@ export default function StudentActivity() {
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error.response || error);
-        const errorMessage = error.response?.data?.message || 
-                            error.response?.status === 401 
-                            ? 'Unauthorized: Please check your token or log in again.' 
-                            : 'Failed to fetch data. Please try again later.';
+        const errorMessage =
+          error.response?.data?.message ||
+          (error.response?.status === 401
+            ? 'Unauthorized: Please check your token or log in again.'
+            : 'Failed to fetch data. Please try again later.');
         setError(errorMessage);
         setLoading(false);
       }
@@ -86,12 +85,10 @@ export default function StudentActivity() {
     }
   }, [token, sort, limit]);
 
-  // Debounced search handler
   const handleSearch = debounce((value) => {
     setSearch(value);
   }, 300);
 
-  // Filter students based on search input
   const filteredStudents = students.filter(
     (stud) =>
       stud.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -157,14 +154,16 @@ export default function StudentActivity() {
         </div>
 
         {filteredStudents.length === 0 && (
-          <div className="text-center text-gray-500 py-4">
-            No students found
-          </div>
+          <div className="text-center text-gray-500 py-4">No students found</div>
         )}
 
+        {/* Mobile View (below md) */}
         <div className="md:hidden grid gap-4">
           {filteredStudents.map((stud) => (
-            <div key={stud.id} className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200">
+            <div
+              key={stud.id}
+              className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
+            >
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-base font-medium text-gray-800">{stud.name}</h3>
               </div>
@@ -184,7 +183,38 @@ export default function StudentActivity() {
           ))}
         </div>
 
-        <div className="hidden md:block overflow-x-auto">
+        {/* Tablet View (md to lg) */}
+        <div className="hidden md:block lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {filteredStudents.map((stud) => (
+            <div
+              key={stud.id}
+              className="bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
+            >
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{stud.name}</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                <div>
+                  <p className="font-semibold">ID:</p>
+                  <p className="truncate">{stud.id}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Email:</p>
+                  <p className="truncate">{stud.email}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Assignment:</p>
+                  <p className="truncate">{stud.assignment}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Created:</p>
+                  <p>{formatDate(stud.createdAt)}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop View (lg and above) */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
               <tr className="text-gray-600">

@@ -5,8 +5,10 @@ import ProtectedRoute from './ProtectedRoute';
 import Sidebar from './components/Sidebar';
 import Login from './Login';
 import Dashboard from './pages/Dashboard';
-import ViewTicket from './pages/ViewTicket';
-import TrackActivities from './pages/TrackActivities';
+import ViewTicket from './pages/ViewTicket/ViewTicket';
+import ViewAllContacts from './pages/ViewTicket/ViewAllContacts/ViewAllContacts';
+import ViewAllTickets from './pages/ViewTicket/ViewAllTicket/ViewAllTickets'
+import TrackActivities from './pages/TrackActivity/TrackActivities'
 import Memberships from './pages/Allmember/Memberships';
 import RevenuesReport from './pages/RevenueReport/RevenuesReport';
 import ManageCourses from './pages/ManageCourses';
@@ -14,8 +16,8 @@ import ManageInstructor from './pages/ManageInstructor';
 import ManageStudent from './pages/ManageStudent';
 import CreateCourse from './components/Instructor_createCourse_component/createCourse';
 import CourseEditor from './components/Instructor_createCourse_component/courseEditor';
-import InstructorActivity from './pages/InstructorActivity/InstructorActivity';
-import StudentActivity from './pages/StudentActivity/StudentActivity';
+import InstructorActivity from './pages/TrackActivity/InstructorActivity/InstructorActivity';
+import StudentActivity from './pages/TrackActivity/StudentActivity/StudentActivity';
 import Setting from './pages/setting';
 import { Menu } from 'lucide-react';
 import { useAuth } from './AuthContext';
@@ -123,13 +125,34 @@ function AppContent() {
             />
 
             <Route
-              path="/view-ticket"
+              path="/ticket-contact"
               element={
                 <ProtectedRoute>
                   <ViewTicket />
                 </ProtectedRoute>
               }
             />
+
+
+               <Route
+              path="/ticket-contact/all-contacts"
+              element={
+                <ProtectedRoute>
+                  <ViewAllContacts />
+                </ProtectedRoute>
+              }
+            />
+
+   <Route
+              path="/ticket-contact/all-tickets"
+              element={
+                <ProtectedRoute>
+                  <ViewAllTickets />
+                </ProtectedRoute>
+              }
+            />
+
+
             <Route
               path="/manage-instructor"
               element={

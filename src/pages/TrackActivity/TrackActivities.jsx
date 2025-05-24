@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import Loading from "./Loading";
+import Loading from '../Loading';
 
 export default function Activities() {
   const [instructors, setInstructors] = useState([]);
@@ -41,7 +41,7 @@ export default function Activities() {
         const axiosInstance = axios.create({
           baseURL: 'https://lms-backend-flwq.onrender.com/api/v1/admin/analytics',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         });
@@ -49,21 +49,16 @@ export default function Activities() {
         const instructorSortParam = instructorSort === 'Newest' ? 'createdAt:desc' : 'createdAt:asc';
         const studentSortParam = studentSort === 'Newest' ? 'createdAt:desc' : 'createdAt:asc';
 
-        // Fetch instructors
         const instructorResponse = await axiosInstance.get(
           `/instructor-activity?limit=${limit}&sort=${instructorSortParam}`
         );
-        const instructorData = instructorResponse.data.data.slice(0, 5); // Ensure max 5
-        console.log('Instructor data:', instructorData); // Debug
+        const instructorData = instructorResponse.data.data.slice(0, 5);
 
-        // Fetch students
         const studentResponse = await axiosInstance.get(
           `/student-activity?limit=${limit}&sort=${studentSortParam}`
         );
-        const studentData = studentResponse.data.data.slice(0, 5); // Ensure max 5
-        console.log('Student data:', studentData); // Debug
+        const studentData = studentResponse.data.data.slice(0, 5);
 
-        // Map instructor data
         const mappedInstructors = instructorData.map((inst) => ({
           id: inst._id,
           name: `${inst.instructor.firstName} ${inst.instructor.lastName}`,
@@ -72,7 +67,6 @@ export default function Activities() {
           createdAt: inst.createdAt,
         }));
 
-        // Map student data
         const mappedStudents = studentData.map((stud) => ({
           id: stud._id,
           name: `${stud.student.firstName} ${stud.student.lastName}`,
@@ -81,7 +75,6 @@ export default function Activities() {
           createdAt: stud.createdAt || new Date().toISOString(),
         }));
 
-        // Client-side sorting as fallback
         const sortedInstructors = mappedInstructors.sort((a, b) => {
           const dateA = new Date(a.createdAt);
           const dateB = new Date(b.createdAt);
@@ -99,10 +92,11 @@ export default function Activities() {
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error.response || error);
-        const errorMessage = error.response?.data?.message || 
-                            error.response?.status === 401 
-                            ? 'Unauthorized: Please check your token or log in again.' 
-                            : 'Failed to fetch data. Please try again later.';
+        const errorMessage =
+          error.response?.data?.message ||
+          (error.response?.status === 401
+            ? 'Unauthorized: Please check your token or log in again.'
+            : 'Failed to fetch data. Please try again later.');
         setError(errorMessage);
         setLoading(false);
       }
@@ -116,7 +110,6 @@ export default function Activities() {
     }
   }, [token, instructorSort, studentSort, limit]);
 
-  // Debounced search handlers
   const handleInstructorSearch = debounce((value) => {
     setInstructorSearch(value);
   }, 300);
@@ -125,7 +118,6 @@ export default function Activities() {
     setStudentSearch(value);
   }, 300);
 
-  // Filter instructors based on search input
   const filteredInstructors = instructors.filter(
     (inst) =>
       inst.name.toLowerCase().includes(instructorSearch.toLowerCase()) ||
@@ -133,7 +125,6 @@ export default function Activities() {
       inst.id.toLowerCase().includes(instructorSearch.toLowerCase())
   );
 
-  // Filter students based on search input
   const filteredStudents = students.filter(
     (stud) =>
       stud.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
@@ -152,9 +143,7 @@ export default function Activities() {
   return (
     <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-4xl font-bold mt-10 text-center md:text-left">
-          Activities
-        </h1>
+        <h1 className="text-2xl md:text-4xl font-bold mt-10 text-center md:text-left">Activities</h1>
         <div className="flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
           <Link
             to="/instructor-activity"
@@ -194,14 +183,16 @@ export default function Activities() {
         </div>
 
         {filteredInstructors.length === 0 && (
-          <div className="text-center text-gray-500 py-4">
-            No instructors found
-          </div>
+          <div className="text-center text-gray-500 py-4">No instructors found</div>
         )}
 
+        {/* Mobile View (below md) */}
         <div className="md:hidden grid gap-4">
           {filteredInstructors.map((inst) => (
-            <div key={inst.id} className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200">
+            <div
+              key={inst.id}
+              className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
+            >
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-base font-medium text-gray-800">{inst.name}</h3>
               </div>
@@ -221,7 +212,38 @@ export default function Activities() {
           ))}
         </div>
 
-        <div className="hidden md:block overflow-x-auto">
+        {/* Tablet View (md to lg) */}
+        <div className="hidden md:block lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {filteredInstructors.map((inst) => (
+            <div
+              key={inst.id}
+              className="bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
+            >
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{inst.name}</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                <div>
+                  <p className="font-semibold">ID:</p>
+                  <p className="truncate">{inst.id}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Email:</p>
+                  <p className="truncate">{inst.email}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Course:</p>
+                  <p className="truncate">{inst.course}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Created:</p>
+                  <p>{formatDate(inst.createdAt)}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop View (lg and above) */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
               <tr className="text-gray-600">
@@ -270,14 +292,16 @@ export default function Activities() {
         </div>
 
         {filteredStudents.length === 0 && (
-          <div className="text-center text-gray-500 py-4">
-            No students found
-          </div>
+          <div className="text-center text-gray-500 py-4">No students found</div>
         )}
 
+        {/* Mobile View (below md) */}
         <div className="md:hidden grid gap-4">
           {filteredStudents.map((stud) => (
-            <div key={stud.id} className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200">
+            <div
+              key={stud.id}
+              className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
+            >
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-base font-medium text-gray-800">{stud.name}</h3>
               </div>
@@ -297,7 +321,38 @@ export default function Activities() {
           ))}
         </div>
 
-        <div className="hidden md:block overflow-x-auto">
+        {/* Tablet View (md to lg) */}
+        <div className="hidden md:block lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {filteredStudents.map((stud) => (
+            <div
+              key={stud.id}
+              className="bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
+            >
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{stud.name}</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                <div>
+                  <p className="font-semibold">ID:</p>
+                  <p className="truncate">{stud.id}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Email:</p>
+                  <p className="truncate">{stud.email}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Assignment:</p>
+                  <p className="truncate">{stud.assignment}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Created:</p>
+                  <p>{formatDate(stud.createdAt)}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop View (lg and above) */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
               <tr className="text-gray-600">

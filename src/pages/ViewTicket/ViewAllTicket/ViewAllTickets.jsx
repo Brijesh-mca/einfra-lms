@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChartBar, faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
-import Loading from "./Loading";
+import { Link } from "react-router-dom";
+import Loading from "../../Loading";
 
-export default function ViewTicket() {
+export default function ViewAllTickets() {
   const [tickets, setTickets] = useState([]);
-  const [contacts, setContacts] = useState([]);
   const [ticketSearchTerm, setTicketSearchTerm] = useState("");
-  const [contactSearchTerm, setContactSearchTerm] = useState("");
-  const [page, setPage] = useState(1);
   const [totalTickets, setTotalTickets] = useState(0);
-  const [resolvedTickets, setResolvedTickets] = useState(0);
-  const [totalTicketsGrowth, setTotalTicketsGrowth] = useState(null);
-  const [resolvedTicketsGrowth, setResolvedTicketsGrowth] = useState(null);
-  const [limit] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [downloadError, setDownloadError] = useState(null);
@@ -38,15 +32,12 @@ export default function ViewTicket() {
 
         const today = new Date("2025-05-21");
         const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-        const previousMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        const previousMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-
         const formatDate = (date) => date.toISOString().split("T")[0];
 
-        const currentResponse = await axiosInstance.get(
-          `/tickets?page=${page}&limit=${limit}&startDate=${formatDate(currentMonthStart)}&endDate=${formatDate(today)}`
+        const response = await axiosInstance.get(
+          `/tickets?startDate=${formatDate(currentMonthStart)}&endDate=${formatDate(today)}`
         );
-        const currentData = currentResponse.data;
+        const currentData = response.data;
 
         const mappedTickets = currentData.data.map((ticket) => ({
           ticketId: ticket._id,
@@ -56,29 +47,9 @@ export default function ViewTicket() {
           _id: ticket._id,
         }));
 
-        const currentTotal = currentData.total || mappedTickets.length;
-        const currentResolved = mappedTickets.filter((t) => t.status.toLowerCase() === "resolved").length;
-
-        const previousResponse = await axiosInstance.get(
-          `/tickets?startDate=${formatDate(previousMonthStart)}&endDate=${formatDate(previousMonthEnd)}`
-        );
-        const previousData = previousResponse.data;
-
-        const previousTotal = previousData.data.length;
-        const previousResolved = previousData.data.filter(
-          (t) => t.status.toLowerCase() === "resolved"
-        ).length;
-
-        const calculateGrowth = (current, previous) => {
-          if (previous === 0) return "N/A";
-          return ((current - previous) / previous * 100).toFixed(1);
-        };
-
         setTickets(mappedTickets);
-        setTotalTickets(currentTotal);
-        setResolvedTickets(currentResolved);
-        setTotalTicketsGrowth(calculateGrowth(currentTotal, previousTotal));
-        setResolvedTicketsGrowth(calculateGrowth(currentResolved, previousResolved));
+        setTotalTickets(currentData.total || mappedTickets.length);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching tickets:", error);
         const errorMessage =
@@ -87,43 +58,17 @@ export default function ViewTicket() {
             ? "Unauthorized: Please check your token or log in again."
             : "Failed to fetch tickets. Please try again later.");
         setError(errorMessage);
-      }
-    };
-
-    const fetchContacts = async () => {
-      try {
-        const response = await axios.get("https://lms-backend-flwq.onrender.com/api/v1/contacts", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        const mappedContacts = response.data.map((contact) => ({
-          _id: contact._id,
-          name: contact.name,
-          email: contact.email,
-          subject: contact.subject,
-          query: contact.query,
-          type: contact.type.charAt(0).toUpperCase() + contact.type.slice(1),
-        }));
-        setContacts(mappedContacts);
-      } catch (error) {
-        console.error("Error fetching contacts:", error);
-        setError(
-          error.response?.status === 401
-            ? "Unauthorized: Please check your token or log in again."
-            : "Failed to fetch contacts. Please try again later."
-        );
+        setLoading(false);
       }
     };
 
     if (token) {
-      Promise.all([fetchTickets(), fetchContacts()]).finally(() => setLoading(false));
+      fetchTickets();
     } else {
       setError("No authentication token found. Please log in.");
       setLoading(false);
     }
-  }, [token, page, limit]);
+  }, [token]);
 
   const handleDownload = async (ticketId) => {
     try {
@@ -205,16 +150,6 @@ export default function ViewTicket() {
       ? "bg-green-100 border-green-500 text-green-700"
       : "bg-red-100 border-red-500 text-red-700";
 
-  const getGrowthColor = (growth) =>
-    growth === "N/A"
-      ? "bg-gray-100 text-gray-700 border-gray-500"
-      : parseFloat(growth) > 0
-      ? "bg-green-100 text-green-700 border-green-500"
-      : "bg-red-100 text-red-700 border-red-500";
-
-  const getGrowthText = (growth) =>
-    growth === "N/A" ? "N/A" : parseFloat(growth) > 0 ? `↑ ${growth}%` : `↓ ${Math.abs(growth)}%`;
-
   const filteredTickets = tickets.filter(
     (t) =>
       t.name.toLowerCase().includes(ticketSearchTerm.toLowerCase()) ||
@@ -222,58 +157,6 @@ export default function ViewTicket() {
       t.category.toLowerCase().includes(ticketSearchTerm.toLowerCase()) ||
       t.status.toLowerCase().includes(ticketSearchTerm.toLowerCase())
   );
-
-  const filteredContacts = contacts.filter(
-    (c) =>
-      c.name.toLowerCase().includes(contactSearchTerm.toLowerCase()) ||
-      c.email.toLowerCase().includes(contactSearchTerm.toLowerCase()) ||
-      c.subject.toLowerCase().includes(contactSearchTerm.toLowerCase()) ||
-      c.query.toLowerCase().includes(contactSearchTerm.toLowerCase()) ||
-      c.type.toLowerCase().includes(contactSearchTerm.toLowerCase())
-  );
-
-  const renderPagination = () => {
-    const totalPages = Math.ceil(totalTickets / limit);
-    const pages = [];
-    const maxPagesToShow = 4;
-    let startPage = Math.max(1, page - 2);
-    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-
-    if (endPage - startPage < maxPagesToShow - 1) {
-      startPage = Math.max(1, endPage - maxPagesToShow + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(
-        <button
-          key={i}
-          onClick={() => setPage(i)}
-          className={`w-7 h-7 rounded text-sm ${
-            i === page
-              ? "bg-cyan-500 text-white"
-              : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-          }`}
-        >
-          {i}
-        </button>
-      );
-    }
-
-    if (endPage < totalPages) {
-      pages.push(<span key="ellipsis" className="px-2">...</span>);
-      pages.push(
-        <button
-          key={totalPages}
-          onClick={() => setPage(totalPages)}
-          className="w-7 h-7 rounded text-sm bg-gray-200 text-gray-800 hover:bg-gray-300"
-        >
-          {totalPages}
-        </button>
-      );
-    }
-
-    return pages;
-  };
 
   if (loading) {
     return <Loading />;
@@ -285,7 +168,29 @@ export default function ViewTicket() {
 
   return (
     <div className="p-4 sm:p-6 text-gray-800">
-      <h1 className="text-3xl font-semibold mb-6 text-center md:text-left">Tickets</h1>
+      <div className="flex items-center gap-4 mb-6">
+        <Link
+          to="/ticket-contact"
+          className="flex items-center px-3 py-2 bg-cyan-500 text-white rounded hover:bg-cyan-600 text-sm"
+        >
+          <svg
+            className="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          Back
+        </Link>
+        <h1 className="text-3xl font-semibold text-center md:text-left">All Tickets</h1>
+      </div>
 
       {downloadError && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
@@ -293,44 +198,12 @@ export default function ViewTicket() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {[
-          { label: "Total Tickets", value: totalTickets, growth: totalTicketsGrowth },
-          { label: "Tickets Resolved", value: resolvedTickets, growth: resolvedTicketsGrowth },
-        ].map((item, i) => (
-          <div
-            key={i}
-            className="card-bg rounded-xl p-6 sm:p-8 shadow relative w-full min-h-[220px]"
-          >
-            <div className="absolute top-5 left-5 bg-white p-3 rounded-md">
-              <FontAwesomeIcon
-                icon={faChartBar}
-                className="text-cyan-700 text-2xl"
-              />
-            </div>
-            <div className="flex flex-col justify-end h-full pt-12 mt-4">
-              <div className="text-gray-700 text-lg mb-1">{item.label}</div>
-              <div className="text-4xl font-bold text-black">{item.value}</div>
-            </div>
-            <div className="absolute bottom-5 right-5">
-              {/* <span
-                className={`inline-flex items-center text-sm px-4 py-2 rounded-full border ${getGrowthColor(
-                  item.growth
-                )}`}
-              >
-                {getGrowthText(item.growth)}
-              </span> */}
-            </div>
-          </div>
-        ))}
-      </div>
-
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
         <div>
           <h2 className="text-xl font-medium mb-1">
             Tickets ( {totalTickets} )
           </h2>
-          <p className="text-sm text-gray-500">View list of Complaints Below</p>
+          <p className="text-sm text-gray-500">View list of All Complaints Below</p>
         </div>
         <div className="relative w-full md:w-64">
           <input
@@ -382,11 +255,12 @@ export default function ViewTicket() {
         </div>
       )}
 
+      {/* Mobile View (below md) */}
       <div className="md:hidden grid gap-4 mb-4">
         {filteredTickets.map((t) => (
           <div
             key={t._id}
-            className="bg-white p-4 rounded-lg shadow-md border border-gray-200"
+            className="bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
           >
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-base font-medium text-gray-800">{t.name}</h3>
@@ -417,7 +291,7 @@ export default function ViewTicket() {
             <div className="mt-2">
               <button
                 onClick={() => handleDownload(t.ticketId)}
-                className="border shadow shadow-black border-gray-300 px-3 py-1 rounded text-sm hover:bg-gray-100 flex items-center gap-2"
+                className="border border-gray-300 px-3 py-1 rounded text-sm hover:bg-gray-100 flex items-center gap-2"
               >
                 <FontAwesomeIcon icon={faDownload} /> Download
               </button>
@@ -431,7 +305,63 @@ export default function ViewTicket() {
         )}
       </div>
 
-      <div className="hidden md:block bg-white rounded shadow p-4 text-black overflow-x-auto">
+      {/* Tablet View (md to lg) */}
+      <div className="hidden md:block lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        {filteredTickets.map((t) => (
+          <div
+            key={t._id}
+            className="bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
+          >
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">{t.name}</h3>
+            <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+              <div>
+                <p className="font-semibold">Ticket ID:</p>
+                <p className="truncate">{t.ticketId}</p>
+              </div>
+              <div>
+                <p className="font-semibold">Category:</p>
+                <p className="truncate">{t.category}</p>
+              </div>
+              <div>
+                <p className="font-semibold">Status:</p>
+                <p className={getStatusColor(t.status)}>{t.status}</p>
+              </div>
+              <div>
+                <p className="font-semibold">Action:</p>
+                {t.status.toLowerCase() === "resolved" ? (
+                  <span className="text-gray-500">N/A</span>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setSelectedTicketId(t.ticketId);
+                      setShowResolveModal(true);
+                    }}
+                    className="px-2 py-1 text-xs rounded bg-cyan-500 text-white hover:bg-cyan-600"
+                  >
+                    Resolve
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="mt-2">
+              <button
+                onClick={() => handleDownload(t.ticketId)}
+                className="border border-gray-300 px-3 py-1 rounded text-sm hover:bg-gray-100 flex items-center gap-2"
+              >
+                <FontAwesomeIcon icon={faDownload} /> Download
+              </button>
+            </div>
+          </div>
+        ))}
+        {filteredTickets.length === 0 && (
+          <div className="text-center text-gray-500 py-4 col-span-2">
+            No tickets match your search.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop View (lg and above) */}
+      <div className="hidden lg:block bg-white rounded shadow p-4 text-black overflow-x-auto mb-4">
         <table className="min-w-full text-sm text-left whitespace-nowrap">
           <thead className="text-black">
             <tr>
@@ -470,7 +400,7 @@ export default function ViewTicket() {
                 <td className="py-2 px-4">
                   <button
                     onClick={() => handleDownload(t.ticketId)}
-                    className="border border-gray-300 px-3 py-1 shadow shadow-black rounded text-sm hover:bg-gray-100 flex items-center gap-2"
+                    className="border border-gray-300 px-3 py-1 rounded text-sm hover:bg-gray-100 flex items-center gap-2"
                   >
                     <FontAwesomeIcon icon={faDownload} /> Download
                   </button>
@@ -486,107 +416,6 @@ export default function ViewTicket() {
             )}
           </tbody>
         </table>
-      </div>
-
-      <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
-        <span>
-          Showing data {(page - 1) * limit + 1} to{" "}
-          {Math.min(page * limit, totalTickets)} of {totalTickets} entries
-        </span>
-        <div className="flex flex-wrap gap-1">{renderPagination()}</div>
-      </div>
-
-      <div className="mt-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-          <div>
-            <h2 className="text-xl font-medium mb-1">
-              Contacts ( {contacts.length} )
-            </h2>
-            <p className="text-sm text-gray-500">View list of Contact Queries Below</p>
-          </div>
-          <div className="relative w-full md:w-64">
-            <input
-              type="text"
-              placeholder="Search contacts by name, email, subject, query, or type..."
-              value={contactSearchTerm}
-              onChange={(e) => setContactSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-cyan-500 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-cyan-400"
-            />
-          </div>
-        </div>
-
-        <div className="md:hidden grid gap-4 mb-4">
-          {filteredContacts.map((c) => (
-            <div
-              key={c._id}
-              className="bg-white p-4 rounded-lg shadow-md border border-gray-200"
-            >
-              <h3 className="text-base font-medium text-gray-800 mb-2">{c.name}</h3>
-              <p className="text-sm text-gray-600 mb-1">
-                <span className="font-semibold">Email:</span> {c.email}
-              </p>
-              <p className="text-sm text-gray-600 mb-1">
-                <span className="font-semibold">Subject:</span> {c.subject}
-              </p>
-              <p className="text-sm text-gray-600 mb-1">
-                <span className="font-semibold">Type:</span> {c.type}
-              </p>
-              <p className="text-sm text-gray-600">
-                <span className="font-semibold">Query:</span>{" "}
-                <span className="relative group">
-                  {c.query.length > 50 ? `${c.query.substring(0, 50)}...` : c.query}
-                  <span className="absolute left-0 mt-1 p-2 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-                    {c.query}
-                  </span>
-                </span>
-              </p>
-            </div>
-          ))}
-          {filteredContacts.length === 0 && (
-            <div className="text-center text-gray-500 py-4">
-              No contacts match your search.
-            </div>
-          )}
-        </div>
-
-        <div className="hidden md:block bg-white rounded shadow p-4 text-black overflow-x-auto">
-          <table className="min-w-full text-sm text-left whitespace-nowrap">
-            <thead className="text-black">
-              <tr>
-                <th className="py-2 px-4">Name</th>
-                <th className="py-2 px-4">Email</th>
-                <th className="py-2 px-4">Subject</th>
-                <th className="py-2 px-4">Type</th>
-                <th className="py-2 px-4">Query</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredContacts.map((c) => (
-                <tr key={c._id} className="hover:bg-cyan-100">
-                  <td className="py-2 px-4">{c.name}</td>
-                  <td className="py-2 px-4">{c.email}</td>
-                  <td className="py-2 px-4">{c.subject}</td>
-                  <td className="py-2 px-4">{c.type}</td>
-                  <td className="py-2 px-4">
-                    <span className="relative group">
-                      {c.query.length > 50 ? `${c.query.substring(0, 50)}...` : c.query}
-                      <span className="absolute left-0 mt-1 p-2 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-                        {c.query}
-                      </span>
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {filteredContacts.length === 0 && (
-                <tr>
-                  <td colSpan="5" className="text-center text-gray-500 py-4">
-                    No contacts match your search.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
   );

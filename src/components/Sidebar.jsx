@@ -66,13 +66,13 @@ export default function Sidebar({ onLinkClick }) {
             <FaChartLine size={18} className="text-black" /> Track Activities
           </NavLink>
           <NavLink
-            to="/view-ticket"
+            to="/ticket-contact"
             onClick={handleClick}
             className={({ isActive }) =>
               isActive ? `${linkClass} ${activeClass}` : linkClass
             }
           >
-            <FaTicketAlt size={18} className="text-black" /> View Ticket
+            <FaTicketAlt size={18} className="text-black" /> Ticket & Contact
           </NavLink>
           <NavLink
             to="/manage-instructor"

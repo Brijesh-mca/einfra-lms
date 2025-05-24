@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import Loading from "../Loading";
+import Loading from '../../Loading';
 
 export default function InstructorActivity() {
   const [instructorsCache, setInstructorsCache] = useState([]);
@@ -14,7 +14,7 @@ export default function InstructorActivity() {
 
   const token = localStorage.getItem('authToken');
 
-  // Debounce function (exact from StudentActivity)
+  // Debounce function
   const debounce = (func, wait) => {
     let timeout;
     return (...args) => {
@@ -23,12 +23,12 @@ export default function InstructorActivity() {
     };
   };
 
-  // Debounced search handler (exact from StudentActivity)
+  // Debounced search handler
   const handleSearch = debounce((value) => {
     setSearch(value);
   }, 300);
 
-  // Format date (exact from StudentActivity)
+  // Format date
   const formatDate = (dateString) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
@@ -39,7 +39,7 @@ export default function InstructorActivity() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const newCacheKey = `${sort}`; // Cache key only depends on sort
+      const newCacheKey = `${sort}`;
       if (newCacheKey !== cacheKey) {
         setInstructorsCache([]);
         setCacheKey(newCacheKey);
@@ -51,7 +51,7 @@ export default function InstructorActivity() {
           const axiosInstance = axios.create({
             baseURL: 'https://lms-backend-flwq.onrender.com/api/v1/admin/analytics',
             headers: {
-              'Authorization': `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
           });
@@ -61,7 +61,6 @@ export default function InstructorActivity() {
             `/instructor-activity?limit=${limit}&sort=${sortParam}`
           );
           const data = response.data.data;
-          console.log('Instructor data:', data); // Debug
 
           const mappedInstructors = data.map((inst) => ({
             id: inst._id,
@@ -71,7 +70,6 @@ export default function InstructorActivity() {
             createdAt: inst.createdAt,
           }));
 
-          // Client-side sorting as fallback (exact from StudentActivity)
           const sortedInstructors = mappedInstructors.sort((a, b) => {
             const dateA = new Date(a.createdAt);
             const dateB = new Date(b.createdAt);
@@ -82,10 +80,11 @@ export default function InstructorActivity() {
           setLoading(false);
         } catch (error) {
           console.error('Error fetching data:', error.response || error);
-          const errorMessage = error.response?.data?.message || 
-                              error.response?.status === 401 
-                              ? 'Unauthorized: Please check your token or log in again.' 
-                              : 'Failed to fetch data. Please try again later.';
+          const errorMessage =
+            error.response?.data?.message ||
+            (error.response?.status === 401
+              ? 'Unauthorized: Please check your token or log in again.'
+              : 'Failed to fetch data. Please try again later.');
           setError(errorMessage);
           setLoading(false);
         }
@@ -102,7 +101,6 @@ export default function InstructorActivity() {
     }
   }, [token, sort, limit, cacheKey, instructorsCache]);
 
-  // Exact search filtering (same as StudentActivity)
   const filteredInstructors = instructorsCache.filter(
     (inst) =>
       inst.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -168,14 +166,16 @@ export default function InstructorActivity() {
         </div>
 
         {filteredInstructors.length === 0 && (
-          <div className="text-center text-gray-500 py-4">
-            No instructors found
-          </div>
+          <div className="text-center text-gray-500 py-4">No instructors found</div>
         )}
 
+        {/* Mobile View (below md) */}
         <div className="md:hidden grid gap-4">
           {filteredInstructors.map((inst) => (
-            <div key={inst.id} className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200">
+            <div
+              key={inst.id}
+              className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
+            >
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-base font-medium text-gray-800">{inst.name}</h3>
               </div>
@@ -195,7 +195,38 @@ export default function InstructorActivity() {
           ))}
         </div>
 
-        <div className="hidden md:block overflow-x-auto">
+        {/* Tablet View (md to lg) */}
+        <div className="hidden md:block lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {filteredInstructors.map((inst) => (
+            <div
+              key={inst.id}
+              className="bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
+            >
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{inst.name}</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                <div>
+                  <p className="font-semibold">ID:</p>
+                  <p className="truncate">{inst.id}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Email:</p>
+                  <p className="truncate">{inst.email}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Course:</p>
+                  <p className="truncate">{inst.course}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Created:</p>
+                  <p>{formatDate(inst.createdAt)}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop View (lg and above) */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
               <tr className="text-gray-600">
