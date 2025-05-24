@@ -28,7 +28,8 @@ const ManageInstructor = () => {
     earnings: 0,
     approved: false,
   });
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""); // General errors
+  const [modalError, setModalError] = useState(""); // Modal-specific errors
   const [loading, setLoading] = useState(true);
   const [toggleLoading, setToggleLoading] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,10 +83,10 @@ const ManageInstructor = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setModalError(""); // Clear previous modal errors
 
     if (!formData.password || formData.password.length < 6) {
-      setError("Password is required and must be at least 6 characters long");
+      setModalError("Password is required and must be at least 6 characters long");
       return;
     }
 
@@ -141,11 +142,13 @@ const ManageInstructor = () => {
           approved: false,
         });
         setSearchQuery("");
+        setModalError(""); // Clear modal error on success
       } else {
-        setError("Failed to enroll instructor: Invalid response data");
+        setModalError("Failed to enroll instructor: Invalid response data");
       }
     } catch (err) {
-      setError(err.response?.data?.message || `Error enrolling instructor: ${err.message}`);
+      const errorMessage = err.response?.data?.message || `Error enrolling instructor: ${err.message}`;
+      setModalError(errorMessage.includes("email") ? "This email is already registered" : errorMessage);
     }
   };
 
@@ -200,6 +203,7 @@ const ManageInstructor = () => {
       setIsModalOpen(false);
       setSelectedInstructor(null);
       setError("");
+      setModalError(""); // Clear modal error on close
       setSearchQuery("");
     }
   };
@@ -219,7 +223,7 @@ const ManageInstructor = () => {
   return (
     <div className="container mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen">
       <div className="mb-6 mt-10">
-        <div className="flex flex-row items-center justify-between sm:items-center sm:flex-row sm:gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <h1 className="text-xl sm:text-3xl font-bold text-gray-800 text-left">
             Manage Instructors
           </h1>
@@ -230,8 +234,8 @@ const ManageInstructor = () => {
             Enroll Instructor
           </button>
         </div>
-        <div className="mt-4 flex justify-end sm:mt-0 sm:ml-4">
-          <div className="mt-3 relative w-full sm:w-64 md:w-100 lg:w-100">
+        <div className="mt-4 flex justify-end">
+          <div className="relative w-full sm:w-64 md:w-80">
             <input
               type="text"
               placeholder="Search by name or email"
@@ -277,6 +281,11 @@ const ManageInstructor = () => {
                 <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800">
                   Enroll New Instructor
                 </h2>
+                {modalError && (
+                  <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                    {modalError}
+                  </div>
+                )}
                 <form onSubmit={handleSubmit}>
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700">
@@ -475,13 +484,13 @@ const ManageInstructor = () => {
                       {selectedInstructor.avatar ? (
                         <img
                           src={selectedInstructor.avatar}
-                          alt="student avatar"
-                      className="w-11 h-11 rounded-full object-cover"
-                      onError={(e) => {
-                        e.target.onerror = null; // Prevent infinite loop in case fallback also fails
-                        e.target.src =
-                          "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
-                      }}
+                          alt="instructor avatar"
+                          className="w-11 h-11 rounded-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src =
+                              "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
+                          }}
                         />
                       ) : (
                         "N/A"
@@ -629,8 +638,8 @@ const ManageInstructor = () => {
             </div>
           )}
 
-          {/* Desktop Table */}
-          <div className="hidden sm:block bg-white rounded-lg shadow-md overflow-hidden">
+          {/* Desktop Table (lg and above) */}
+          <div className="hidden lg:block bg-white rounded-lg shadow-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead className="bg-gray-200">
@@ -687,62 +696,44 @@ const ManageInstructor = () => {
                     >
                       <td className="py-4 px-6 text-sm text-gray-800 font-medium">
                         <div className="flex items-center gap-2">
-                          
-                          <div className="flex items-center space-x-3">
-                            <img
-                              src={
-                                instructor.avatar ||
-                                "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
-                              }
-                                alt="student avatar"
-                      className="w-11 h-11 rounded-full object-cover"
-                      onError={(e) => {
-                        e.target.onerror = null; // Prevent infinite loop in case fallback also fails
-                        e.target.src =
-                          "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
-                      }}
-                            />
-                            <span>{`${instructor.firstName || "N/A"} ${instructor.lastName || "N/A"}`}</span>
-                          </div>
+                          <img
+                            src={
+                              instructor.avatar ||
+                              "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
+                            }
+                            alt="instructor avatar"
+                            className="w-11 h-11 rounded-full object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src =
+                                "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
+                            }}
+                          />
+                          <span>{`${instructor.firstName || "N/A"} ${instructor.lastName || "N/A"}`}</span>
                         </div>
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                          
-                          {instructor.email || "N/A"}
-                        </div>
+                        {instructor.email || "N/A"}
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                         
-                          {instructor.phone || "N/A"}
-                        </div>
+                        {instructor.phone || "N/A"}
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                         
-                          {instructor.expertise?.join(", ") || "N/A"}
-                        </div>
+                        {instructor.expertise?.join(", ") || "N/A"}
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                         
-                          {instructor.totalCourses || 0}
-                        </div>
+                        {instructor.totalCourses || 0}
                       </td>
                       <td className="py-4 px-6 text-sm">
-                        <div className="flex items-center gap-2">
-                        
-                          <span
-                            className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                              instructor.isActive
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
-                            }`}
-                          >
-                            {instructor.isActive ? "Active" : "Inactive"}
-                          </span>
-                        </div>
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                            instructor.isActive
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {instructor.isActive ? "Active" : "Inactive"}
+                        </span>
                       </td>
                       <td className="py-4 px-6 text-sm">
                         <button
@@ -759,12 +750,12 @@ const ManageInstructor = () => {
             </div>
           </div>
 
-          {/* Mobile Card Layout */}
-          <div className="sm:hidden space-y-4">
+          {/* Tablet and Mobile Layout (below lg) - Card-based */}
+          <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredInstructors.map((instructor) => (
               <div
                 key={instructor._id || Math.random()}
-                className="bg-white rounded-lg shadow-md p-4 border border-gray-200"
+                className="bg-white rounded-lg shadow-md p-4 sm:p-5 border border-gray-200"
               >
                 <div className="mb-3">
                   <div className="flex items-center space-x-3">
@@ -773,23 +764,21 @@ const ManageInstructor = () => {
                         instructor.avatar ||
                         "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
                       }
-                        alt="student avatar"
-                      className="w-11 h-11 rounded-full object-cover"
+                      alt="instructor avatar"
+                      className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover"
                       onError={(e) => {
-                        e.target.onerror = null; // Prevent infinite loop in case fallback also fails
+                        e.target.onerror = null;
                         e.target.src =
                           "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
                       }}
                     />
                     <div>
                       <div className="flex items-center gap-2">
-                        
-                        <h3 className="text-lg font-semibold text-gray-800">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-800">
                           {`${instructor.firstName || "N/A"} ${instructor.lastName || "N/A"}`}
                         </h3>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
-                       
                         <span
                           className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
                             instructor.isActive
@@ -803,30 +792,34 @@ const ManageInstructor = () => {
                     </div>
                   </div>
                 </div>
-                <div className="space-y-2 text-sm text-gray-600">
+                <div className="space-y-2 text-sm sm:text-base text-gray-600">
                   <div className="flex items-center gap-2">
-                    <FaEnvelope className="clr text-sm" />
+                    <FaEnvelope className="clr text-sm sm:text-base" />
                     <p><strong>Email:</strong> {instructor.email || "N/A"}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaPhone className="clr text-sm" />
+                    <FaPhone className="clr text-sm sm:text-base" />
                     <p><strong>Phone:</strong> {instructor.phone || "N/A"}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaCode className="clr text-sm" />
+                    <FaCode className="clr text-sm sm:text-base" />
                     <p>
                       <strong>Expertise:</strong>{" "}
                       {instructor.expertise?.join(", ") || "N/A"}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaBook className="clr text-sm" />
+                    <FaBook className="clr text-sm sm:text-base" />
                     <p><strong>Courses:</strong> {instructor.totalCourses || 0}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaStar className="clr text-sm sm:text-base" />
+                    <p><strong>Rating:</strong> {instructor.rating || 0}</p>
                   </div>
                   <div className="mt-3">
                     <button
                       onClick={() => openDetailsPopup(instructor)}
-                      className="shadow shadow-black card-bg text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs"
+                      className="card-bg text-white shadow shadow-black px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
                     >
                       More
                     </button>

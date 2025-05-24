@@ -14,6 +14,8 @@ import ManageInstructor from './pages/ManageInstructor';
 import ManageStudent from './pages/ManageStudent';
 import CreateCourse from './components/Instructor_createCourse_component/createCourse';
 import CourseEditor from './components/Instructor_createCourse_component/courseEditor';
+import InstructorActivity from './pages/InstructorActivity/InstructorActivity';
+import StudentActivity from './pages/StudentActivity/StudentActivity';
 import Setting from './pages/setting';
 import { Menu } from 'lucide-react';
 import { useAuth } from './AuthContext';
@@ -56,7 +58,7 @@ function AppContent() {
           <>
             <aside
               className={`
-                fixed ${showSidebar ? 'lg:top-0 top-10' : 'top-0'} left-0 h-[98vh] w-64 z-40 bg-white shadow-md
+                fixed ${showSidebar ? 'lg:top-0 top-10' : 'top-0'} left-0 h-[100vh] w-64 z-40 bg-white shadow-md
                 transform transition-transform duration-300
                 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                 lg:translate-x-0
@@ -74,7 +76,7 @@ function AppContent() {
           </>
         )}
 
-        <main className={`flex-1 ${showSidebar ? 'lg:ml-64' : 'ml-0'} overflow-x-auto`}>
+        <main className={`flex-1 ${showSidebar ? 'lg:ml-64' : 'ml-0'}  overflow-x-auto`}>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route
@@ -101,6 +103,25 @@ function AppContent() {
                 </ProtectedRoute>
               }
             />
+
+                <Route
+              path="/instructor-activity"
+              element={
+                <ProtectedRoute>
+                  < InstructorActivity />
+                </ProtectedRoute>
+              }
+            />
+
+               <Route
+              path="/student-activity"
+              element={
+                <ProtectedRoute>
+                  < StudentActivity />
+                </ProtectedRoute>
+              }
+            />
+
             <Route
               path="/view-ticket"
               element={

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Loading from "./Loading"; // Import the Loading component
+import { Link } from 'react-router-dom';
+import Loading from "./Loading";
 
 export default function Activities() {
   const [instructors, setInstructors] = useState([]);
@@ -9,18 +10,22 @@ export default function Activities() {
   const [error, setError] = useState(null);
   const [instructorSearch, setInstructorSearch] = useState('');
   const [studentSearch, setStudentSearch] = useState('');
-  const [instructorPage, setInstructorPage] = useState(1);
-  const [studentPage, setStudentPage] = useState(1);
-  const [instructorTotal, setInstructorTotal] = useState(0);
-  const [studentTotal, setStudentTotal] = useState(0);
-  const [instructorSort, setInstructorSort] = useState('Newest'); // State for instructor sort order
-  const [studentSort, setStudentSort] = useState('Newest'); // State for student sort order
-  const [limit] = useState(10); // Items per page
+  const [instructorSort, setInstructorSort] = useState('Newest');
+  const [studentSort, setStudentSort] = useState('Newest');
+  const [limit] = useState(5); // Strictly 5 items
 
-  // Replace with your actual token retrieval logic
-  const token = localStorage.getItem('authToken'); // Adjust as needed
+  const token = localStorage.getItem('authToken');
 
-  // Format date for display
+  // Debounce function
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  // Format date
   const formatDate = (dateString) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
@@ -32,7 +37,7 @@ export default function Activities() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Configure Axios with default headers
+        setLoading(true);
         const axiosInstance = axios.create({
           baseURL: 'https://lms-backend-flwq.onrender.com/api/v1/admin/analytics',
           headers: {
@@ -41,24 +46,25 @@ export default function Activities() {
           },
         });
 
-        // Determine sort parameter based on sort state
         const instructorSortParam = instructorSort === 'Newest' ? 'createdAt:desc' : 'createdAt:asc';
         const studentSortParam = studentSort === 'Newest' ? 'createdAt:desc' : 'createdAt:asc';
 
-        // Fetch instructor data with pagination and sorting
+        // Fetch instructors
         const instructorResponse = await axiosInstance.get(
-          `/instructor-activity?page=${instructorPage}&limit=${limit}&sort=${instructorSortParam}`
+          `/instructor-activity?limit=${limit}&sort=${instructorSortParam}`
         );
-        const instructorData = instructorResponse.data;
+        const instructorData = instructorResponse.data.data.slice(0, 5); // Ensure max 5
+        console.log('Instructor data:', instructorData); // Debug
 
-        // Fetch student data with pagination and sorting
+        // Fetch students
         const studentResponse = await axiosInstance.get(
-          `/student-activity?page=${studentPage}&limit=${limit}&sort=${studentSortParam}`
+          `/student-activity?limit=${limit}&sort=${studentSortParam}`
         );
-        const studentData = studentResponse.data;
+        const studentData = studentResponse.data.data.slice(0, 5); // Ensure max 5
+        console.log('Student data:', studentData); // Debug
 
-        // Map instructor data with createdAt
-        const mappedInstructors = instructorData.data.map((inst) => ({
+        // Map instructor data
+        const mappedInstructors = instructorData.map((inst) => ({
           id: inst._id,
           name: `${inst.instructor.firstName} ${inst.instructor.lastName}`,
           email: inst.instructor.email,
@@ -66,13 +72,13 @@ export default function Activities() {
           createdAt: inst.createdAt,
         }));
 
-        // Map student data with createdAt (assuming student data has createdAt)
-        const mappedStudents = studentData.data.map((stud) => ({
+        // Map student data
+        const mappedStudents = studentData.map((stud) => ({
           id: stud._id,
           name: `${stud.student.firstName} ${stud.student.lastName}`,
           email: stud.student.email,
           assignment: stud.course ? stud.course.title : 'No Course Assigned',
-          createdAt: stud.createdAt || new Date().toISOString(), // Fallback to current date if missing
+          createdAt: stud.createdAt || new Date().toISOString(),
         }));
 
         // Client-side sorting as fallback
@@ -90,11 +96,9 @@ export default function Activities() {
 
         setInstructors(sortedInstructors);
         setStudents(sortedStudents);
-        setInstructorTotal(instructorData.total || sortedInstructors.length);
-        setStudentTotal(studentData.total || sortedStudents.length);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching data:', error.response || error);
         const errorMessage = error.response?.data?.message || 
                             error.response?.status === 401 
                             ? 'Unauthorized: Please check your token or log in again.' 
@@ -110,7 +114,16 @@ export default function Activities() {
       setError('No authentication token found. Please log in.');
       setLoading(false);
     }
-  }, [token, instructorPage, studentPage, instructorSort, studentSort, limit]);
+  }, [token, instructorSort, studentSort, limit]);
+
+  // Debounced search handlers
+  const handleInstructorSearch = debounce((value) => {
+    setInstructorSearch(value);
+  }, 300);
+
+  const handleStudentSearch = debounce((value) => {
+    setStudentSearch(value);
+  }, 300);
 
   // Filter instructors based on search input
   const filteredInstructors = instructors.filter(
@@ -128,52 +141,8 @@ export default function Activities() {
       stud.id.toLowerCase().includes(studentSearch.toLowerCase())
   );
 
-  // Generate pagination buttons
-  const renderPagination = (total, currentPage, setPage) => {
-    const totalPages = Math.ceil(total / limit);
-    const pages = [];
-    
-    // Simple pagination logic: show first 4 pages, ellipsis, and last page
-    const maxPagesToShow = 4;
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-
-    if (endPage - startPage < maxPagesToShow - 1) {
-      startPage = Math.max(1, endPage - maxPagesToShow + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(
-        <button
-          key={i}
-          onClick={() => setPage(i)}
-          className={`w-8 h-8 rounded text-sm ${
-            i === currentPage ? 'bg-cyan-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-          }`}
-        >
-          {i}
-        </button>
-      );
-    }
-
-    if (endPage < totalPages) {
-      pages.push(<span key="ellipsis" className="px-2">...</span>);
-      pages.push(
-        <button
-          key={totalPages}
-          onClick={() => setPage(totalPages)}
-          className="w-8 h-8 rounded text-sm bg-gray-200 text-gray-800 hover:bg-gray-300"
-        >
-          {totalPages}
-        </button>
-      );
-    }
-
-    return pages;
-  };
-
   if (loading) {
-    return <Loading />; // Show loading spinner
+    return <Loading />;
   }
 
   if (error) {
@@ -182,12 +151,25 @@ export default function Activities() {
 
   return (
     <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans">
-      <h1 className="text-2xl md:text-4xl font-bold mb-6 md:mb-8 mt-10 text-center md:text-left">
-        Activities
-      </h1>
-      <p className="text-sm text-gray-500 mb-4">
-        {/* Current date: May 23, 2025 (Sorted activities are relative to this date) */}
-      </p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-4xl font-bold mt-10 text-center md:text-left">
+          Activities
+        </h1>
+        <div className="flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
+          <Link
+            to="/instructor-activity"
+            className="px-4 py-2 bg-cyan-500 text-white rounded hover:bg-cyan-600 text-sm"
+          >
+            Instructor Activity
+          </Link>
+          <Link
+            to="/student-activity"
+            className="px-4 py-2 bg-cyan-500 text-white rounded hover:bg-cyan-600 text-sm"
+          >
+            Student Activity
+          </Link>
+        </div>
+      </div>
 
       {/* Instructors Section */}
       <section className="bg-white p-4 md:p-6 rounded-2xl shadow mb-8 md:mb-10">
@@ -197,19 +179,12 @@ export default function Activities() {
             <input
               type="text"
               placeholder="Search by name, email, or ID"
-              value={instructorSearch}
-              onChange={(e) => {
-                setInstructorSearch(e.target.value);
-                setInstructorPage(1); // Reset to first page on search
-              }}
+              onChange={(e) => handleInstructorSearch(e.target.value)}
               className="px-3 py-1 border border-blue-500 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
             <select
               value={instructorSort}
-              onChange={(e) => {
-                setInstructorSort(e.target.value);
-                setInstructorPage(1); // Reset to first page on sort change
-              }}
+              onChange={(e) => setInstructorSort(e.target.value)}
               className="px-2 py-1 border border-blue-500 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-300"
             >
               <option value="Newest">Newest</option>
@@ -218,7 +193,12 @@ export default function Activities() {
           </div>
         </div>
 
-        {/* Mobile Card View */}
+        {filteredInstructors.length === 0 && (
+          <div className="text-center text-gray-500 py-4">
+            No instructors found
+          </div>
+        )}
+
         <div className="md:hidden grid gap-4">
           {filteredInstructors.map((inst) => (
             <div key={inst.id} className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200">
@@ -241,7 +221,6 @@ export default function Activities() {
           ))}
         </div>
 
-        {/* Desktop Table View */}
         <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
@@ -266,14 +245,6 @@ export default function Activities() {
             </tbody>
           </table>
         </div>
-
-        <div className="text-sm text-gray-500 mt-3">
-          Showing data {(instructorPage - 1) * limit + 1} to{' '}
-          {Math.min(instructorPage * limit, instructorTotal)} of {instructorTotal} entries
-        </div>
-        <div className="flex flex-wrap justify-end gap-2 mt-2">
-          {renderPagination(instructorTotal, instructorPage, setInstructorPage)}
-        </div>
       </section>
 
       {/* Students Section */}
@@ -284,19 +255,12 @@ export default function Activities() {
             <input
               type="text"
               placeholder="Search by name, email, or ID"
-              value={studentSearch}
-              onChange={(e) => {
-                setStudentSearch(e.target.value);
-                setStudentPage(1); // Reset to first page on search
-              }}
+              onChange={(e) => handleStudentSearch(e.target.value)}
               className="px-3 py-1 border border-blue-500 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
             <select
               value={studentSort}
-              onChange={(e) => {
-                setStudentSort(e.target.value);
-                setStudentPage(1); // Reset to first page on sort change
-              }}
+              onChange={(e) => setStudentSort(e.target.value)}
               className="px-2 py-1 border border-blue-500 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-300"
             >
               <option value="Newest">Newest</option>
@@ -305,7 +269,12 @@ export default function Activities() {
           </div>
         </div>
 
-        {/* Mobile Card View */}
+        {filteredStudents.length === 0 && (
+          <div className="text-center text-gray-500 py-4">
+            No students found
+          </div>
+        )}
+
         <div className="md:hidden grid gap-4">
           {filteredStudents.map((stud) => (
             <div key={stud.id} className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200">
@@ -328,7 +297,6 @@ export default function Activities() {
           ))}
         </div>
 
-        {/* Desktop Table View */}
         <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
@@ -352,14 +320,6 @@ export default function Activities() {
               ))}
             </tbody>
           </table>
-        </div>
-
-        <div className="text-sm text-gray-500 mt-3">
-          Showing data {(studentPage - 1) * limit + 1} to{' '}
-          {Math.min(studentPage * limit, studentTotal)} of {studentTotal} entries
-        </div>
-        <div className="flex flex-wrap justify-end gap-2 mt-2">
-          {renderPagination(studentTotal, studentPage, setStudentPage)}
         </div>
       </section>
     </div>

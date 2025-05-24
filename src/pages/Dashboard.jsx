@@ -5,14 +5,14 @@ import axios from "axios";
 import Loading from "./Loading"; // Import the Loading component
 
 const Card = ({ children }) => (
-  <div className="bg-white rounded-2xl shadow-lg p-6 w-full">{children}</div>
+  <div className="bg-white rounded-2xl  shadow-lg p-6 w-full">{children}</div>
 );
 
 
 const InfoCard = ({ title, value, link, to }) => (
   <Card className="flex flex-col items-center justify-between h-[100px] p-1 lg:p-4">
-    <div className="flex flex-col  h-[100px]">
-      <h3 className="text-sm text-gray-500 mb-1">{title}</h3>
+    <div className="flex flex-col  h-[120px]">
+      <h3 className="text-sm text-black mb-1">{title}</h3>
       <div className="text-3xl font-bold">{value}</div>
     </div>
     <Link
@@ -44,11 +44,11 @@ const UserList = ({ title, users }) => {
 
   return (
     <Card>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex  justify-between items-center mb-2">
         <h3 className="text-lg font-semibold">{title}</h3>
         
       </div>
-      <ul className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+      <ul className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
         {users.map((user) => (
           <li
             key={user._id}
@@ -56,9 +56,14 @@ const UserList = ({ title, users }) => {
           >
             <div className="flex items-center gap-3">
               <img
-                src={user.avatar || "https://via.placeholder.com/36"}
-                alt={`${user.firstName} ${user.lastName}`}
-                className="w-9 h-9 rounded-full"
+                src={user.avatar || "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"}
+                   alt="instructor avatar"
+                            className="w-9 h-9 rounded-full object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src =
+                                "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
+                            }}
               />
               <div>
                 <div className="font-medium text-sm">{`${user.firstName} ${user.lastName}`}</div>
@@ -237,7 +242,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-2 mt-2 lg:p-6 lg:mt-5 space-y-6 bg-gray-50 min-h-screen">
+    <div className="p-5  space-y-6 bg-gray-50 min-h-screen">
       {/* Info Cards */}
       <div className="grid grid-cols-1 mt-4 lg:mt-0  md:grid-cols-2 gap-4">
         <InfoCard
@@ -255,7 +260,7 @@ export default function Dashboard() {
       </div>
 
       {/* Instructors & Students */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1  md:grid-cols-2 gap-4">
         <UserList title="Instructors" users={instructors} />
         <UserList title="Students" users={students} />
       </div>
