@@ -92,9 +92,9 @@ function GeneralInfo({ state, dispatch, onPreview }) {
         learningOutcomes: state.learningOutcomes.filter((item) => item.trim() !== ''),
       };
 
-      console.log('Sending to:', `${API_URL}/api/v1/admin/courses`);
-      console.log('Payload:', payload);
-      console.log('Token:', token);
+      // console.log('Sending to:', `${API_URL}/api/v1/admin/courses`);
+      // console.log('Payload:', payload);
+      // console.log('Token:', token);
 
       const response = await axios.post(`${API_URL}/api/v1/admin/courses`, payload, {
         headers: {

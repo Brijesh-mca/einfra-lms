@@ -121,7 +121,7 @@ export default function InstructorActivity() {
       <div className="flex items-center gap-4 mb-6 md:mb-8 mt-10">
         <Link
           to="/track-activities"
-          className="flex items-center px-3 py-2 bg-cyan-500 text-white rounded hover:bg-cyan-600 text-sm"
+          className="flex items-center px-3 py-2 card-bg text-white rounded hover:bg-cyan-600 text-sm"
         >
           <svg
             className="w-4 h-4 mr-2"

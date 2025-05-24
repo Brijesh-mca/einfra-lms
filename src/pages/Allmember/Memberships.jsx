@@ -19,7 +19,7 @@ const Memberships = () => {
           },
         });
 
-        console.log("Fetching memberships from /analytics/enrollments");
+        // console.log("Fetching memberships from /analytics/enrollments");
         const response = await axiosInstance.get("/analytics/enrollments");
         // console.log("Memberships response:", response.data);
 

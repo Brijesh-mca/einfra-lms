@@ -171,7 +171,7 @@ export default function ViewAllTickets() {
       <div className="flex items-center gap-4 mb-6">
         <Link
           to="/ticket-contact"
-          className="flex items-center px-3 py-2 bg-cyan-500 text-white rounded hover:bg-cyan-600 text-sm"
+          className="flex items-center px-3 py-2 card-bg text-white rounded hover:bg-cyan-600 text-sm"
         >
           <svg
             className="w-4 h-4 mr-2"
@@ -245,7 +245,7 @@ export default function ViewAllTickets() {
               </button>
               <button
                 onClick={handleResolve}
-                className="px-4 py-2 bg-cyan-500 text-white rounded hover:bg-cyan-600"
+                className="px-4 py-2 card-bg text-white rounded hover:bg-cyan-600"
                 disabled={!resolutionText.trim()}
               >
                 Resolve
@@ -276,7 +276,7 @@ export default function ViewAllTickets() {
                     setSelectedTicketId(t.ticketId);
                     setShowResolveModal(true);
                   }}
-                  className="px-2 py-1 text-xs rounded bg-cyan-500 text-white hover:bg-cyan-600"
+                  className="px-2 py-1 text-xs rounded card-bg text-white hover:bg-cyan-600"
                 >
                   Resolve
                 </button>
@@ -336,7 +336,7 @@ export default function ViewAllTickets() {
                       setSelectedTicketId(t.ticketId);
                       setShowResolveModal(true);
                     }}
-                    className="px-2 py-1 text-xs rounded bg-cyan-500 text-white hover:bg-cyan-600"
+                    className="px-2 py-1 text-xs rounded card-bg text-white hover:bg-cyan-600"
                   >
                     Resolve
                   </button>
@@ -391,7 +391,7 @@ export default function ViewAllTickets() {
                         setSelectedTicketId(t.ticketId);
                         setShowResolveModal(true);
                       }}
-                      className="px-2 py-1 text-xs rounded bg-cyan-500 text-white hover:bg-cyan-600"
+                      className="px-2 py-1 text-xs rounded card-bg text-white hover:bg-cyan-600"
                     >
                       Resolve
                     </button>

@@ -225,7 +225,7 @@ const AllCoursesPage = () => {
 
   const handlePlay = (courseId) => {
     // Implement play functionality (e.g., redirect to course player or log)
-    console.log(`Playing course with ID: ${courseId}`);
+    // console.log(`Playing course with ID: ${courseId}`);
   };
 
   if (loading) {

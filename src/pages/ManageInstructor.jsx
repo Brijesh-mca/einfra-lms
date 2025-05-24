@@ -229,7 +229,7 @@ const ManageInstructor = () => {
           </h1>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="card-bg text-white shadow shadow-black px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            className="card-bg text-white shadow shadow-black px-4 py-2 rounded-lg hover:card-bg transition-colors text-sm"
           >
             Enroll Instructor
           </button>
@@ -440,7 +440,7 @@ const ManageInstructor = () => {
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                      className="px-4 py-2 card-bg text-white rounded-lg hover:card-bg transition-colors text-sm"
                     >
                       Enroll
                     </button>
@@ -738,7 +738,7 @@ const ManageInstructor = () => {
                       <td className="py-4 px-6 text-sm">
                         <button
                           onClick={() => openDetailsPopup(instructor)}
-                          className="card-bg shadow shadow-black text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs"
+                          className="card-bg shadow shadow-black text-white px-3 py-1 rounded-lg hover:card-bg transition-colors text-xs"
                         >
                           More
                         </button>
@@ -819,7 +819,7 @@ const ManageInstructor = () => {
                   <div className="mt-3">
                     <button
                       onClick={() => openDetailsPopup(instructor)}
-                      className="card-bg text-white shadow shadow-black px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                      className="card-bg text-white shadow shadow-black px-3 py-1 rounded-lg hover:card-bg transition-colors text-xs sm:text-sm"
                     >
                       More
                     </button>

@@ -147,13 +147,13 @@ export default function Activities() {
         <div className="flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
           <Link
             to="/instructor-activity"
-            className="px-4 py-2 bg-cyan-500 text-white shadow-lg shadow-black font-bold rounded hover:bg-cyan-600 text-sm"
+            className="px-4 py-2 card-bg text-white shadow-lg shadow-black font-bold rounded hover:bg-cyan-600 text-sm"
           >
             Instructor Activity
           </Link>
           <Link
             to="/student-activity"
-            className="px-4 py-2 bg-cyan-500 shadow-lg shadow-black text-white font-bold rounded hover:bg-cyan-600 text-sm"
+            className="px-4 py-2 card-bg shadow-lg shadow-black text-white font-bold rounded hover:bg-cyan-600 text-sm"
           >
             Student Activity
           </Link>

@@ -296,9 +296,9 @@ export default function ViewTicket() {
           </div>
           <Link
             to="/ticket-contact/all-tickets"
-            className="px-4 py-2 bg-cyan-500 text-white rounded hover:bg-cyan-600 text-sm"
+            className="px-4 py-2 card-bg text-white rounded hover:bg-cyan-600 text-sm"
           >
-            View All Tickets
+             All Tickets
           </Link>
         </div>
         <div className="relative w-full md:w-64">
@@ -341,7 +341,7 @@ export default function ViewTicket() {
               </button>
               <button
                 onClick={handleResolve}
-                className="px-4 py-2 bg-cyan-500 text-white rounded hover:bg-cyan-600"
+                className="px-4 py-2 card-bg text-white rounded hover:bg-cyan-600"
                 disabled={!resolutionText.trim()}
               >
                 Resolve
@@ -365,7 +365,7 @@ export default function ViewTicket() {
                   setSelectedTicketId(t.ticketId);
                   setShowResolveModal(true);
                 }}
-                className="px-2 py-1 text-xs rounded bg-cyan-500 text-white hover:bg-cyan-600"
+                className="px-2 py-1 text-xs rounded card-bg text-white hover:bg-cyan-600"
               >
                 Resolve
               </button>
@@ -421,7 +421,7 @@ export default function ViewTicket() {
                     setSelectedTicketId(t.ticketId);
                     setShowResolveModal(true);
                   }}
-                  className="px-2 py-1 text-xs rounded bg-cyan-500 text-white hover:bg-cyan-600"
+                  className="px-2 py-1 text-xs rounded card-bg text-white hover:bg-cyan-600"
                 >
                   Resolve
                 </button>
@@ -468,7 +468,7 @@ export default function ViewTicket() {
                       setSelectedTicketId(t.ticketId);
                       setShowResolveModal(true);
                     }}
-                    className="px-2 py-1 text-xs rounded bg-cyan-500 text-white hover:bg-cyan-600"
+                    className="px-2 py-1 text-xs rounded card-bg text-white hover:bg-cyan-600"
                   >
                     Resolve
                   </button>
@@ -505,9 +505,9 @@ export default function ViewTicket() {
             </div>
             <Link
               to="/ticket-contact/all-contacts"
-              className="px-4 py-2 bg-cyan-500 text-white rounded hover:bg-cyan-600 text-sm"
+              className="px-4 py-2 card-bg text-white rounded hover:bg-cyan-600 text-sm"
             >
-              View All Contacts
+              All Contacts
             </Link>
           </div>
           <div className="relative w-full md:w-64">
