@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Loading from "../Loading"
+import { Link } from 'react-router-dom';
+import Loading from "../Loading";
 
 export default function InstructorActivity() {
-  const [instructors, setInstructors] = useState([]);
+  const [instructorsCache, setInstructorsCache] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('Newest');
   const [limit] = useState(100); // Fetch all entries
+  const [cacheKey, setCacheKey] = useState('');
 
   const token = localStorage.getItem('authToken');
 
-  // Debounce function
+  // Debounce function (exact from StudentActivity)
   const debounce = (func, wait) => {
     let timeout;
     return (...args) => {
@@ -21,7 +23,12 @@ export default function InstructorActivity() {
     };
   };
 
-  // Format date
+  // Debounced search handler (exact from StudentActivity)
+  const handleSearch = debounce((value) => {
+    setSearch(value);
+  }, 300);
+
+  // Format date (exact from StudentActivity)
   const formatDate = (dateString) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
@@ -32,48 +39,58 @@ export default function InstructorActivity() {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        setLoading(true);
-        const axiosInstance = axios.create({
-          baseURL: 'https://lms-backend-flwq.onrender.com/api/v1/admin/analytics',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+      const newCacheKey = `${sort}`; // Cache key only depends on sort
+      if (newCacheKey !== cacheKey) {
+        setInstructorsCache([]);
+        setCacheKey(newCacheKey);
+      }
 
-        const sortParam = sort === 'Newest' ? 'createdAt:desc' : 'createdAt:asc';
-        const response = await axiosInstance.get(
-          `/instructor-activity?limit=${limit}&sort=${sortParam}`
-        );
-        const data = response.data.data;
-        console.log('Instructor data:', data); // Debug
+      if (!instructorsCache.length) {
+        try {
+          setLoading(true);
+          const axiosInstance = axios.create({
+            baseURL: 'https://lms-backend-flwq.onrender.com/api/v1/admin/analytics',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
 
-        const mappedInstructors = data.map((inst) => ({
-          id: inst._id,
-          name: `${inst.instructor.firstName} ${inst.instructor.lastName}`,
-          email: inst.instructor.email,
-          course: inst.title,
-          createdAt: inst.createdAt,
-        }));
+          const sortParam = sort === 'Newest' ? 'createdAt:desc' : 'createdAt:asc';
+          const response = await axiosInstance.get(
+            `/instructor-activity?limit=${limit}&sort=${sortParam}`
+          );
+          const data = response.data.data;
+          console.log('Instructor data:', data); // Debug
 
-        // Client-side sorting as fallback
-        const sortedInstructors = mappedInstructors.sort((a, b) => {
-          const dateA = new Date(a.createdAt);
-          const dateB = new Date(b.createdAt);
-          return sort === 'Newest' ? dateB - dateA : dateA - dateB;
-        });
+          const mappedInstructors = data.map((inst) => ({
+            id: inst._id,
+            name: `${inst.instructor.firstName} ${inst.instructor.lastName}`,
+            email: inst.instructor.email,
+            course: inst.title,
+            createdAt: inst.createdAt,
+          }));
 
-        setInstructors(sortedInstructors);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching data:', error.response || error);
-        const errorMessage = error.response?.data?.message || 
-                            error.response?.status === 401 
-                            ? 'Unauthorized: Please check your token or log in again.' 
-                            : 'Failed to fetch data. Please try again later.';
-        setError(errorMessage);
-        setLoading(false);
+          // Client-side sorting as fallback (exact from StudentActivity)
+          const sortedInstructors = mappedInstructors.sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            return sort === 'Newest' ? dateB - dateA : dateA - dateB;
+          });
+
+          setInstructorsCache(sortedInstructors);
+          setLoading(false);
+        } catch (error) {
+          console.error('Error fetching data:', error.response || error);
+          const errorMessage = error.response?.data?.message || 
+                              error.response?.status === 401 
+                              ? 'Unauthorized: Please check your token or log in again.' 
+                              : 'Failed to fetch data. Please try again later.';
+          setError(errorMessage);
+          setLoading(false);
+        }
+      } else {
+        setLoading(false); // Use cached data
       }
     };
 
@@ -83,15 +100,10 @@ export default function InstructorActivity() {
       setError('No authentication token found. Please log in.');
       setLoading(false);
     }
-  }, [token, sort, limit]);
+  }, [token, sort, limit, cacheKey, instructorsCache]);
 
-  // Debounced search handler
-  const handleSearch = debounce((value) => {
-    setSearch(value);
-  }, 300);
-
-  // Filter instructors based on search input
-  const filteredInstructors = instructors.filter(
+  // Exact search filtering (same as StudentActivity)
+  const filteredInstructors = instructorsCache.filter(
     (inst) =>
       inst.name.toLowerCase().includes(search.toLowerCase()) ||
       inst.email.toLowerCase().includes(search.toLowerCase()) ||
@@ -108,9 +120,31 @@ export default function InstructorActivity() {
 
   return (
     <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans">
-      <h1 className="text-2xl md:text-4xl font-bold mb-6 md:mb-8 mt-10 text-center md:text-left">
-        Instructor Activity
-      </h1>
+      <div className="flex items-center gap-4 mb-6 md:mb-8 mt-10">
+        <Link
+          to="/track-activities"
+          className="flex items-center px-3 py-2 bg-cyan-500 text-white rounded hover:bg-cyan-600 text-sm"
+        >
+          <svg
+            className="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          Back
+        </Link>
+        <h1 className="text-2xl md:text-4xl font-bold text-center md:text-left">
+          Instructor Activity
+        </h1>
+      </div>
 
       <section className="bg-white p-4 md:p-6 rounded-2xl shadow">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
