@@ -475,9 +475,13 @@ const ManageInstructor = () => {
                       {selectedInstructor.avatar ? (
                         <img
                           src={selectedInstructor.avatar}
-                          alt={`${selectedInstructor.firstName || "N/A"} ${selectedInstructor.lastName || "N/A"}`}
-                          className="w-10 h-10 rounded-full object-cover inline-block"
-                          onError={(e) => (e.target.src = "")}
+                          alt="student avatar"
+                      className="w-11 h-11 rounded-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null; // Prevent infinite loop in case fallback also fails
+                        e.target.src =
+                          "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
+                      }}
                         />
                       ) : (
                         "N/A"
@@ -690,9 +694,13 @@ const ManageInstructor = () => {
                                 instructor.avatar ||
                                 "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
                               }
-                              alt={`${instructor.firstName || "N/A"} ${instructor.lastName || "N/A"}`}
-                              className="w-10 h-10 rounded-full object-cover"
-                              onError={(e) => (e.target.src = "")}
+                                alt="student avatar"
+                      className="w-11 h-11 rounded-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null; // Prevent infinite loop in case fallback also fails
+                        e.target.src =
+                          "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
+                      }}
                             />
                             <span>{`${instructor.firstName || "N/A"} ${instructor.lastName || "N/A"}`}</span>
                           </div>
@@ -765,9 +773,13 @@ const ManageInstructor = () => {
                         instructor.avatar ||
                         "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
                       }
-                      alt={`${instructor.firstName || "N/A"} ${instructor.lastName || "N/A"}`}
-                      className="w-12 h-12 rounded-full object-cover"
-                      onError={(e) => (e.target.src = "")}
+                        alt="student avatar"
+                      className="w-11 h-11 rounded-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null; // Prevent infinite loop in case fallback also fails
+                        e.target.src =
+                          "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
+                      }}
                     />
                     <div>
                       <div className="flex items-center gap-2">

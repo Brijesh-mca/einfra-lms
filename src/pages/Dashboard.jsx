@@ -40,9 +40,7 @@ const UserList = ({ title, users }) => {
     <Card>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">{title}</h3>
-        <a href="#" className="text-sm text-teal-500">
-          Sort by Newest
-        </a>
+        
       </div>
       <ul className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
         {users.map((user) => (
@@ -177,36 +175,36 @@ export default function Dashboard() {
         });
 
         // Fetch instructors
-        console.log(`Fetching instructors: limit=${limit}`);
+        // console.log(`Fetching instructors: limit=${limit}`);
         const instructorResponse = await axiosInstance.get(
           `/users/instructors?limit=${limit}`
         );
-        console.log("Instructor response:", instructorResponse.data);
+        // console.log("Instructor response:", instructorResponse.data);
         setInstructors(instructorResponse.data.data);
 
         // Fetch students
-        console.log(`Fetching students: limit=${limit}`);
+        // console.log(`Fetching students: limit=${limit}`);
         const studentResponse = await axiosInstance.get(
           `/users/students?limit=${limit}`
         );
-        console.log("Student response:", studentResponse.data);
+        // console.log("Student response:", studentResponse.data);
         setStudents(studentResponse.data.data);
 
         // Fetch total revenue
-        console.log("Fetching total revenue");
+        // console.log("Fetching total revenue");
         const revenueResponse = await axiosInstance.get("/analytics/revenue");
-        console.log("Revenue response:", revenueResponse.data);
+        // console.log("Revenue response:", revenueResponse.data);
         setTotalRevenue(revenueResponse.data.data.totalRevenue || 0);
 
         // Fetch total enrollments
-        console.log("Fetching total enrollments");
+        // console.log("Fetching total enrollments");
         const enrollmentResponse = await axiosInstance.get("/analytics/total-enrollments");
-        console.log("Enrollment response:", enrollmentResponse.data);
+        // console.log("Enrollment response:", enrollmentResponse.data);
         setTotalEnrollments(enrollmentResponse.data.data.totalEnrollments || 0);
 
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        // console.error("Error fetching data:", error);
         const errorMessage =
           error.response?.status === 401
             ? "Unauthorized: Please check your token or log in again."
@@ -235,7 +233,7 @@ export default function Dashboard() {
   return (
     <div className="p-6 mt-5 space-y-6 bg-gray-50 min-h-screen">
       {/* Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 bg-red-200 h-50 md:grid-cols-2 gap-4">
         <InfoCard
           title="Revenues"
           value={formatCurrency(totalRevenue)}

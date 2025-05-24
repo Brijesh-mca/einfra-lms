@@ -53,7 +53,6 @@ const ManageStudent = () => {
         );
         if (response.data.success && Array.isArray(response.data.data)) {
           setStudents(response.data.data);
-          
         } else {
           setError("Failed to fetch students: Invalid response data");
         }
@@ -611,17 +610,19 @@ const ManageStudent = () => {
                         <div className="flex items-center gap-2">
                           {/* <FaUser className="clr text-sm" /> */}
                           <div className="flex items-center space-x-3">
-                            <img
-                              src={
-                                student.avatar ||
-                                "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
-                              }
-                              alt={`${student.firstName || "N/A"} ${
-                                student.lastName || "N/A"
-                              }`}
-                              className="w-10 h-10 rounded-full object-cover"
-                              onError={(e) => (e.target.src = "")}
-                            />
+                             <img
+                      src={
+                        student.avatar ||
+                        "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
+                      }
+                      alt="student avatar"
+                      className="w-11 h-11 rounded-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null; // Prevent infinite loop in case fallback also fails
+                        e.target.src =
+                          "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
+                      }}
+                    />
                             <span>{`${student.firstName || "N/A"} ${
                               student.lastName || "N/A"
                             }`}</span>
@@ -635,8 +636,7 @@ const ManageStudent = () => {
                         {student.phone || "N/A"}
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                         <div className="flex items-center gap-2">
-                         
+                        <div className="flex items-center gap-2">
                           {student.skills?.join(", ") || "N/A"}
                         </div>
                       </td>
@@ -668,7 +668,6 @@ const ManageStudent = () => {
 
           <div className="sm:hidden space-y-4">
             {filteredStudents.map((student) => (
-
               <div
                 key={student._id || Math.random()}
                 className="bg-white rounded-lg shadow-md p-4 border border-gray-200"
@@ -680,12 +679,15 @@ const ManageStudent = () => {
                         student.avatar ||
                         "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
                       }
-                      alt={`${student.firstName || "N/A"} ${
-                        student.lastName || "N/A"
-                      }`}
+                      alt="student avatar"
                       className="w-12 h-12 rounded-full object-cover"
-                      onError={(e) => (e.target.src = "")}
+                      onError={(e) => {
+                        e.target.onerror = null; // Prevent infinite loop in case fallback also fails
+                        e.target.src =
+                          "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
+                      }}
                     />
+
                     <div>
                       <div className="flex items-center gap-2">
                         {/* <FaUser className="clr text-sm" /> */}
@@ -728,7 +730,6 @@ const ManageStudent = () => {
                     <p>
                       <strong>Skills: </strong>
                       {student.skills?.join(", ") || "N/A"}
-                      
                     </p>
                   </div>
 
