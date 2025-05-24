@@ -6,14 +6,13 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState(localStorage.getItem('authToken') || null);
+  const [loading, setLoading] = useState(true);
 
-  // Check for existing token and restore session on mount
   useEffect(() => {
     const restoreSession = async () => {
       const storedToken = localStorage.getItem('authToken');
       if (storedToken) {
         try {
-          // Attempt to fetch user data with the token (assuming /api/v1/auth/me exists)
           const response = await fetch('https://lms-backend-flwq.onrender.com/api/v1/auth/me', {
             method: 'GET',
             headers: {
@@ -33,7 +32,6 @@ export const AuthProvider = ({ children }) => {
             });
             setIsAuthenticated(true);
           } else {
-            // Token is invalid; clear it and log out
             localStorage.removeItem('authToken');
             setToken(null);
             setUser(null);
@@ -41,13 +39,15 @@ export const AuthProvider = ({ children }) => {
           }
         } catch (error) {
           console.error('Error restoring session:', error);
-          // Fallback: If the API call fails, clear the token
           localStorage.removeItem('authToken');
           setToken(null);
           setUser(null);
           setIsAuthenticated(false);
         }
+      } else {
+        setIsAuthenticated(false);
       }
+      setLoading(false);
     };
 
     restoreSession();
@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, token, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, token, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

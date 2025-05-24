@@ -18,31 +18,27 @@ import Setting from './pages/setting';
 import { Menu } from 'lucide-react';
 import { useAuth } from './AuthContext';
 
-// Child component to ensure useAuth is called inside AuthProvider
 function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showMenuButton, setShowMenuButton] = useState(true);
   const location = useLocation();
   const { isAuthenticated } = useAuth();
 
-  // Hide sidebar on login page
   const isLoginPage = location.pathname === '/login';
   const showSidebar = isAuthenticated && !isLoginPage;
 
-  // Scroll to top on route change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // Handle scroll to show/hide menu button
   useEffect(() => {
     let scrollTimeout;
     const handleScroll = () => {
-      setShowMenuButton(false); // Hide button when scrolling starts
-      clearTimeout(scrollTimeout); // Clear previous timeout
+      setShowMenuButton(false);
+      clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
-        setShowMenuButton(true); // Show button when scrolling stops
-      }, 150); // Adjust delay as needed
+        setShowMenuButton(true);
+      }, 150);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -53,8 +49,7 @@ function AppContent() {
   }, []);
 
   return (
-    <div className="min-h-screen flex bg-gray-50 ">
-      {/* Sidebar - Fixed on all screen sizes, only shown when authenticated and not on login page */}
+    <div className="min-h-screen flex bg-gray-50">
       {showSidebar && (
         <>
           <aside
@@ -68,7 +63,6 @@ function AppContent() {
             <Sidebar onLinkClick={() => setSidebarOpen(false)} />
           </aside>
 
-          {/* Overlay on mobile - Blur effect instead of black */}
           {sidebarOpen && (
             <div
               className="fixed inset-0 z-30 backdrop-blur-sm bg-transparent lg:hidden"
@@ -76,7 +70,6 @@ function AppContent() {
             />
           )}
 
-          {/* Mobile Toggle Button - Only show when sidebar is closed and not scrolling */}
           {!sidebarOpen && showMenuButton && (
             <button
               onClick={() => setSidebarOpen(true)}
@@ -88,7 +81,6 @@ function AppContent() {
         </>
       )}
 
-      {/* Main Content - Adjust margin based on sidebar visibility */}
       <main className={`flex-1 ${showSidebar ? 'lg:ml-64' : 'ml-0'} overflow-x-auto`}>
         <Routes>
           <Route path="/login" element={<Login />} />
