@@ -53,7 +53,7 @@ const ManageStudent = () => {
         );
         if (response.data.success && Array.isArray(response.data.data)) {
           setStudents(response.data.data);
-          console.log("Fetched students:", response.data.data);
+          
         } else {
           setError("Failed to fetch students: Invalid response data");
         }
@@ -381,7 +381,7 @@ const ManageStudent = () => {
                     <input
                       type="text"
                       name="skills"
-                      value={formData.skills}
+                      value={formData.skills || "N/A"}
                       onChange={handleInputChange}
                       className="mt-1 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       placeholder="e.g., Python, SQL"
@@ -427,43 +427,67 @@ const ManageStudent = () => {
             >
               <div className="bg-white border-2 border-blue-400 rounded-lg p-4 sm:p-6 w-11/12 sm:w-3/4 md:w-1/2 lg:w-1/3 max-h-[80vh] overflow-y-auto">
                 <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800">
-                  {`${selectedStudent.firstName || "N/A"} ${selectedStudent.lastName || "N/A"}`} Details
+                  {`${selectedStudent.firstName || "N/A"} ${
+                    selectedStudent.lastName || "N/A"
+                  }`}{" "}
+                  Details
                 </h2>
                 <div className="space-y-2 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
-                    <FaUser className="text-blue-500 text-sm" />
-                    <p><strong>First Name:</strong> {selectedStudent.firstName || "N/A"}</p>
+                    <FaUser className="clr text-sm" />
+                    <p>
+                      <strong>First Name:</strong>{" "}
+                      {selectedStudent.firstName || "N/A"}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaUser className="text-blue-500 text-sm" />
-                    <p><strong>Last Name:</strong> {selectedStudent.lastName || "N/A"}</p>
+                    <FaUser className="clr text-sm" />
+                    <p>
+                      <strong>Last Name:</strong>{" "}
+                      {selectedStudent.lastName || "N/A"}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaEnvelope className="text-blue-500 text-sm" />
-                    <p><strong>Email:</strong> {selectedStudent.email || "N/A"}</p>
+                    <FaEnvelope className="clr text-sm" />
+                    <p>
+                      <strong>Email:</strong> {selectedStudent.email || "N/A"}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaPhone className="text-blue-500 text-sm" />
-                    <p><strong>Phone:</strong> {selectedStudent.phone || "N/A"}</p>
+                    <FaPhone className="clr text-sm" />
+                    <p>
+                      <strong>Phone:</strong> {selectedStudent.phone || "N/A"}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaGraduationCap className="text-blue-500 text-sm" />
-                    <p><strong>Education:</strong> {selectedStudent.education || "N/A"}</p>
+                    <FaGraduationCap className="clr text-sm" />
+                    <p>
+                      <strong>Education:</strong>{" "}
+                      {selectedStudent.education || "N/A"}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaBriefcase className="text-blue-500 text-sm" />
-                    <p><strong>Occupation:</strong> {selectedStudent.occupation || "N/A"}</p>
+                    <FaBriefcase className="clr text-sm" />
+                    <p>
+                      <strong>Occupation:</strong>{" "}
+                      {selectedStudent.occupation || "N/A"}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaCode className="text-blue-500 text-sm" />
-                    <p><strong>Skills:</strong> {selectedStudent.skills || "N/A"}</p>
+                    <FaCode className="clr text-sm" />
+                    <p>
+                      <strong>Skills:</strong> {selectedStudent.skills || "N/A"}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaHeart className="text-blue-500 text-sm" />
-                    <p><strong>Interests:</strong> {selectedStudent.interests || "N/A"}</p>
+                    <FaHeart className="clr text-sm" />
+                    <p>
+                      <strong>Interests:</strong>{" "}
+                      {selectedStudent.interests || "N/A"}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaCheckCircle className="text-blue-500 text-sm" />
+                    <FaCheckCircle className="clr text-sm" />
                     <p>
                       <strong>Status:</strong>
                       <span
@@ -478,11 +502,14 @@ const ManageStudent = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaShieldAlt className="text-blue-500 text-sm" />
-                    <p><strong>Verified:</strong> {selectedStudent.isVerified ? "Yes" : "No"}</p>
+                    <FaShieldAlt className="clr text-sm" />
+                    <p>
+                      <strong>Verified:</strong>{" "}
+                      {selectedStudent.isVerified ? "Yes" : "No"}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaCalendarAlt className="text-blue-500 text-sm" />
+                    <FaCalendarAlt className="clr text-sm" />
                     <p>
                       <strong>Created At:</strong>{" "}
                       {selectedStudent.createdAt
@@ -491,7 +518,7 @@ const ManageStudent = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaSignInAlt className="text-blue-500 text-sm" />
+                    <FaSignInAlt className="clr text-sm" />
                     <p>
                       <strong>Last Login:</strong>{" "}
                       {selectedStudent.lastLogin
@@ -538,37 +565,37 @@ const ManageStudent = () => {
                   <tr>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
-                        <FaUser className="text-blue-500 text-sm" />
+                        <FaUser className="clr text-sm" />
                         Name
                       </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
-                        <FaEnvelope className="text-blue-500 text-sm" />
+                        <FaEnvelope className="clr text-sm" />
                         Email
                       </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
-                        <FaPhone className="text-blue-500 text-sm" />
+                        <FaPhone className="clr text-sm" />
                         Phone
                       </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
-                        <FaCode className="text-blue-500 text-sm" />
+                        <FaCode className="clr text-sm" />
                         Skills
                       </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
-                        <FaCheckCircle className="text-blue-500 text-sm" />
+                        <FaCheckCircle className="clr text-sm" />
                         Status
                       </div>
                     </th>
                     <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
-                        <FaCog className="text-blue-500 text-sm" />
+                        <FaCog className="clr text-sm" />
                         Action
                       </div>
                     </th>
@@ -582,15 +609,22 @@ const ManageStudent = () => {
                     >
                       <td className="py-4 px-6 text-sm text-gray-800 font-medium">
                         <div className="flex items-center gap-2">
-                          {/* <FaUser className="text-blue-500 text-sm" /> */}
+                          {/* <FaUser className="clr text-sm" /> */}
                           <div className="flex items-center space-x-3">
                             <img
-                              src={student.avatar || "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"}
-                              alt={`${student.firstName || "N/A"} ${student.lastName || "N/A"}`}
+                              src={
+                                student.avatar ||
+                                "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"
+                              }
+                              alt={`${student.firstName || "N/A"} ${
+                                student.lastName || "N/A"
+                              }`}
                               className="w-10 h-10 rounded-full object-cover"
                               onError={(e) => (e.target.src = "")}
                             />
-                            <span>{`${student.firstName || "N/A"} ${student.lastName || "N/A"}`}</span>
+                            <span>{`${student.firstName || "N/A"} ${
+                              student.lastName || "N/A"
+                            }`}</span>
                           </div>
                         </div>
                       </td>
@@ -601,7 +635,7 @@ const ManageStudent = () => {
                         {student.phone || "N/A"}
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                        {student.skills || "N/A"}
+                        {student.skills[0]}{student.skills[1]}{student.skills[2] || "N/A"}
                       </td>
                       <td className="py-4 px-6 text-sm">
                         <span
@@ -631,6 +665,7 @@ const ManageStudent = () => {
 
           <div className="sm:hidden space-y-4">
             {filteredStudents.map((student) => (
+
               <div
                 key={student._id || Math.random()}
                 className="bg-white rounded-lg shadow-md p-4 border border-gray-200"
@@ -638,20 +673,27 @@ const ManageStudent = () => {
                 <div className="mb-3">
                   <div className="flex items-center space-x-3">
                     <img
-                      src={student.avatar || "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"}
-                      alt={`${student.firstName || "N/A"} ${student.lastName || "N/A"}`}
+                      src={
+                        student.avatar ||
+                        "https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg"
+                      }
+                      alt={`${student.firstName || "N/A"} ${
+                        student.lastName || "N/A"
+                      }`}
                       className="w-12 h-12 rounded-full object-cover"
                       onError={(e) => (e.target.src = "")}
                     />
                     <div>
                       <div className="flex items-center gap-2">
-                        {/* <FaUser className="text-blue-500 text-sm" /> */}
+                        {/* <FaUser className="clr text-sm" /> */}
                         <h3 className="text-lg font-semibold text-gray-800">
-                          {`${student.firstName || "N/A"} ${student.lastName || "N/A"}`}
+                          {`${student.firstName || "N/A"} ${
+                            student.lastName || "N/A"
+                          }`}
                         </h3>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
-                        {/* <FaCheckCircle className="text-blue-500 text-sm" /> */}
+                        {/* <FaCheckCircle className="clr text-sm" /> */}
                         <span
                           className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
                             student.isActive
@@ -667,17 +709,33 @@ const ManageStudent = () => {
                 </div>
                 <div className="space-y-2 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
-                    <FaEnvelope className="text-blue-500 text-sm" />
-                    <p><strong>Email:</strong> {student.email || "N/A"}</p>
+                    <FaEnvelope className="clr text-sm" />
+                    <p>
+                      <strong>Email:</strong> {student.email || "N/A"}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaPhone className="text-blue-500 text-sm" />
-                    <p><strong>Phone:</strong> {student.phone || "N/A"}</p>
+                    <FaPhone className="clr text-sm" />
+                    <p>
+                      <strong>Phone:</strong> {student.phone || "N/A"}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaCode className="text-blue-500 text-sm" />
-                    <p><strong>Skills:</strong> {student.skills || "N/A"}</p>
+                    <FaCode className="clr text-sm" />
+                    <p>
+                      <strong>Skills:</strong>
+                      {student.skills.map((skill, index) => (
+                        <span
+                          key={index}
+                          className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-1"
+                        >
+                          {skill || "N/A"}
+                        </span>
+                      ))}
+                      
+                    </p>
                   </div>
+
                   <div className="mt-3">
                     <button
                       onClick={() => openDetailsPopup(student)}
