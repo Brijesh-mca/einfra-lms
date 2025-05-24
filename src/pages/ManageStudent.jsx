@@ -33,7 +33,8 @@ const ManageStudent = () => {
     skills: "",
     interests: "",
   });
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""); // General errors
+  const [modalError, setModalError] = useState(""); // Modal-specific errors
   const [loading, setLoading] = useState(true);
   const [toggleLoading, setToggleLoading] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,10 +83,10 @@ const ManageStudent = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setModalError(""); // Clear modal-specific error
 
     if (!formData.password || formData.password.length < 6) {
-      setError("Password is required and must be at least 6 characters long");
+      setModalError("Password is required and must be at least 6 characters long");
       return;
     }
 
@@ -129,11 +130,11 @@ const ManageStudent = () => {
         });
         setSearchQuery("");
       } else {
-        setError("Failed to enroll student: Invalid response data");
+        setModalError("Failed to enroll student: Invalid response data");
       }
     } catch (err) {
       console.error("Enroll student error:", err);
-      setError(
+      setModalError(
         err.response?.data?.message || `Error enrolling student: ${err.message}`
       );
     }
@@ -194,6 +195,7 @@ const ManageStudent = () => {
       setIsModalOpen(false);
       setSelectedStudent(null);
       setError("");
+      setModalError(""); // Clear modal error on close
       setFormData({
         firstName: "",
         lastName: "",
@@ -283,6 +285,11 @@ const ManageStudent = () => {
                 <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800">
                   Enroll New Student
                 </h2>
+                {modalError && (
+                  <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                    {modalError}
+                  </div>
+                )}
                 <form onSubmit={handleSubmit}>
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700">
@@ -559,40 +566,40 @@ const ManageStudent = () => {
 
           <div className="hidden sm:block bg-white rounded-lg shadow-md overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full">
+              <table className="min-w-full table-fixed">
                 <thead className="bg-gray-200">
                   <tr>
-                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
+                    <th className="w-1/4 py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
                         <FaUser className="clr text-sm" />
                         Name
                       </div>
                     </th>
-                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
+                    <th className="w-1/4 py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
                         <FaEnvelope className="clr text-sm" />
                         Email
                       </div>
                     </th>
-                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
+                    <th className="w-1/6 py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
                         <FaPhone className="clr text-sm" />
                         Phone
                       </div>
                     </th>
-                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
+                    <th className="w-1/4 py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
                         <FaCode className="clr text-sm" />
                         Skills
                       </div>
                     </th>
-                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
+                    <th className="w-1/6 py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
                         <FaCheckCircle className="clr text-sm" />
                         Status
                       </div>
                     </th>
-                    <th className="py-4 px-6 text-left text-sm font-semibold text-gray-700">
+                    <th className="w-1/6 py-4 px-6 text-left text-sm font-semibold text-gray-700">
                       <div className="flex items-center gap-2">
                         <FaCog className="clr text-sm" />
                         Action
@@ -606,39 +613,34 @@ const ManageStudent = () => {
                       key={student._id || Math.random()}
                       className="border-b hover:bg-gray-100 transition-colors"
                     >
-                      <td className="py-4 px-6 text-sm text-gray-800 font-medium">
+                      <td className="py-4 px-6 text-sm text-gray-800 font-medium truncate">
                         <div className="flex items-center gap-2">
-                          {/* <FaUser className="clr text-sm" /> */}
-                          <div className="flex items-center space-x-3">
-                             <img
-                      src={
-                        student.avatar ||
-                        "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
-                      }
-                      alt="student avatar"
-                      className="w-11 h-11 rounded-full object-cover"
-                      onError={(e) => {
-                        e.target.onerror = null; // Prevent infinite loop in case fallback also fails
-                        e.target.src =
-                          "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
-                      }}
-                    />
-                            <span>{`${student.firstName || "N/A"} ${
-                              student.lastName || "N/A"
-                            }`}</span>
-                          </div>
+                          <img
+                            src={
+                              student.avatar ||
+                              "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg"
+                            }
+                            alt="student avatar"
+                            className="w-11 h-11 rounded-full object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src =
+                                "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
+                            }}
+                          />
+                          <span className="truncate">{`${student.firstName || "N/A"} ${
+                            student.lastName || "N/A"
+                          }`}</span>
                         </div>
                       </td>
-                      <td className="py-4 px-6 text-sm text-gray-600">
+                      <td className="py-4 px-6 text-sm text-gray-600 truncate">
                         {student.email || "N/A"}
                       </td>
-                      <td className="py-4 px-6 text-sm text-gray-600">
+                      <td className="py-4 px-6 text-sm text-gray-600 truncate">
                         {student.phone || "N/A"}
                       </td>
-                      <td className="py-4 px-6 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                          {student.skills?.join(", ") || "N/A"}
-                        </div>
+                      <td className="py-4 px-6 text-sm text-gray-600 truncate">
+                        {student.skills?.join(", ") || "N/A"}
                       </td>
                       <td className="py-4 px-6 text-sm">
                         <span
@@ -682,15 +684,13 @@ const ManageStudent = () => {
                       alt="student avatar"
                       className="w-12 h-12 rounded-full object-cover"
                       onError={(e) => {
-                        e.target.onerror = null; // Prevent infinite loop in case fallback also fails
+                        e.target.onerror = null;
                         e.target.src =
                           "https://res.cloudinary.com/dcgilmdbm/image/upload/v1747893719/default_avatar_xpw8jv.jpg";
                       }}
                     />
-
                     <div>
                       <div className="flex items-center gap-2">
-                        {/* <FaUser className="clr text-sm" /> */}
                         <h3 className="text-lg font-semibold text-gray-800">
                           {`${student.firstName || "N/A"} ${
                             student.lastName || "N/A"
@@ -698,7 +698,6 @@ const ManageStudent = () => {
                         </h3>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
-                        {/* <FaCheckCircle className="clr text-sm" /> */}
                         <span
                           className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
                             student.isActive
@@ -732,7 +731,6 @@ const ManageStudent = () => {
                       {student.skills?.join(", ") || "N/A"}
                     </p>
                   </div>
-
                   <div className="mt-3">
                     <button
                       onClick={() => openDetailsPopup(student)}

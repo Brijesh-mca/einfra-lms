@@ -105,7 +105,7 @@ function GeneralInfo({ state, dispatch, onPreview }) {
 
       if (response.data.success) {
         setMessage('Course saved successfully!');
-        setTimeout(() => navigate('/dashboard/my-courses'), 2000);
+        setTimeout(() => navigate('/manage-courses'), 2000);
       } else {
         setMessage('Failed to save course.');
       }

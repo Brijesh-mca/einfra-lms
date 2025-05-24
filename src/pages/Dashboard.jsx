@@ -10,7 +10,7 @@ const Card = ({ children }) => (
 
 
 const InfoCard = ({ title, value, link, to }) => (
-  <Card className="flex flex-col items-center justify-between h-[100px] p-4">
+  <Card className="flex flex-col items-center justify-between h-[100px] p-1 lg:p-4">
     <div className="flex flex-col  h-[100px]">
       <h3 className="text-sm text-gray-500 mb-1">{title}</h3>
       <div className="text-3xl font-bold">{value}</div>
@@ -237,9 +237,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 mt-5 space-y-6 bg-gray-50 min-h-screen">
+    <div className="p-2 mt-2 lg:p-6 lg:mt-5 space-y-6 bg-gray-50 min-h-screen">
       {/* Info Cards */}
-      <div className="grid grid-cols-1  md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 mt-4 lg:mt-0  md:grid-cols-2 gap-4">
         <InfoCard
           title="Revenues"
           value={formatCurrency(totalRevenue)}

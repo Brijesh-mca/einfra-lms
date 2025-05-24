@@ -31,7 +31,7 @@ export default function Sidebar({ onLinkClick }) {
   if (!user) return null; // Hide sidebar if not authenticated
 
   return (
-    <div className="w-64 bg-white text-white border-r h-full flex flex-col justify-between rounded-xl shadow-md p-4 border-none">
+    <div className="w-64 bg-white text-white border-r h-full flex flex-col justify-between rounded-xl shadow-lg p-4 border-none">
       <div>
         <div className="flex items-center justify-left pl-[1rem] mb-8">
           <div className="text-xl font-bold text-cyan-500">LMS</div>
@@ -103,7 +103,7 @@ export default function Sidebar({ onLinkClick }) {
           </NavLink>
         </nav>
       </div>
-      <div className="mt-6">
+      <div className="mt-10">
         <div className="flex items-center space-x-3">
           <img
             src={user.avatar}
@@ -112,12 +112,12 @@ export default function Sidebar({ onLinkClick }) {
           />
           <div>
             <p className="text-sm font-semibold text-gray-700">{user.firstName}</p>
-            <span className="text-xs text-green-800 bg-green-100 px-2 py-1 rounded-md">
+            <span className="text-xs text-green-800 bg-green-100 px-2 rounded-md">
               {user.role}
             </span>
           </div>
         </div>
-        <div className="mt-4">
+        <div className="">
           <NavLink
             to="/settings"
             onClick={handleClick}

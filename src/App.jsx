@@ -31,149 +31,143 @@ function AppContent() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  useEffect(() => {
-    let scrollTimeout;
-    const handleScroll = () => {
-      setShowMenuButton(false);
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        setShowMenuButton(true);
-      }, 150);
-    };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearTimeout(scrollTimeout);
-    };
-  }, []);
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       {showSidebar && (
-        <>
-          <aside
-            className={`
-              fixed top-0 left-0 h-full w-64 z-40 bg-white shadow-md
-              transform transition-transform duration-300
-              ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-              lg:translate-x-0
-            `}
-          >
-            <Sidebar onLinkClick={() => setSidebarOpen(false)} />
-          </aside>
-
-          {sidebarOpen && (
-            <div
-              className="fixed inset-0 z-30 backdrop-blur-sm bg-transparent lg:hidden"
-              onClick={() => setSidebarOpen(false)}
-            />
-          )}
-
-          {!sidebarOpen && showMenuButton && (
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden fixed top-4 right-1 z-50 p-2 bg-white rounded shadow-md"
-            >
-              <Menu />
-            </button>
-          )}
-        </>
+        <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-lg">
+          <div className="flex items-center justify-between p-2">
+            <h1 className="text-xl font-bold"></h1>
+            {showMenuButton && (
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-2 bg-gray-100 rounded shadow-md"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        </header>
       )}
 
-      <main className={`flex-1 ${showSidebar ? 'lg:ml-64' : 'ml-0'} overflow-x-auto`}>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/manage-courses"
-            element={
-              <ProtectedRoute>
-                <ManageCourses />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/track-activities"
-            element={
-              <ProtectedRoute>
-                <TrackActivities />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/view-ticket"
-            element={
-              <ProtectedRoute>
-                <ViewTicket />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/manage-instructor"
-            element={
-              <ProtectedRoute>
-                <ManageInstructor />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/manage-student"
-            element={
-              <ProtectedRoute>
-                <ManageStudent />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/create-course"
-            element={
-              <ProtectedRoute>
-                <CreateCourse />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/course-editor/:courseId"
-            element={
-              <ProtectedRoute>
-                <CourseEditor />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/memberships"
-            element={
-              <ProtectedRoute>
-                <Memberships />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/revenues-report"
-            element={
-              <ProtectedRoute>
-                <RevenuesReport />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <Setting />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </main>
+      <div className={`flex flex-1 ${showSidebar ? 'lg:pt-0 pt-10' : 'pt-0'}`}>
+        {showSidebar && (
+          <>
+            <aside
+              className={`
+                fixed ${showSidebar ? 'lg:top-0 top-10' : 'top-0'} left-0 h-[98vh] w-64 z-40 bg-white shadow-md
+                transform transition-transform duration-300
+                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                lg:translate-x-0
+              `}
+            >
+              <Sidebar onLinkClick={() => setSidebarOpen(false)} />
+            </aside>
+
+            {sidebarOpen && (
+              <div
+                className={`fixed inset-0 ${showSidebar ? 'top-10' : 'top-0'} z-30 backdrop-blur-sm bg-transparent lg:hidden`}
+                onClick={() => setSidebarOpen(false)}
+              />
+            )}
+          </>
+        )}
+
+        <main className={`flex-1 ${showSidebar ? 'lg:ml-64' : 'ml-0'} overflow-x-auto`}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manage-courses"
+              element={
+                <ProtectedRoute>
+                  <ManageCourses />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/track-activities"
+              element={
+                <ProtectedRoute>
+                  <TrackActivities />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/view-ticket"
+              element={
+                <ProtectedRoute>
+                  <ViewTicket />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manage-instructor"
+              element={
+                <ProtectedRoute>
+                  <ManageInstructor />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manage-student"
+              element={
+                <ProtectedRoute>
+                  <ManageStudent />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/create-course"
+              element={
+                <ProtectedRoute>
+                  <CreateCourse />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/course-editor/:courseId"
+              element={
+                <ProtectedRoute>
+                  <CourseEditor />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/memberships"
+              element={
+                <ProtectedRoute>
+                  <Memberships />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/revenues-report"
+              element={
+                <ProtectedRoute>
+                  <RevenuesReport />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Setting />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </main>
+      </div>
     </div>
   );
 }
