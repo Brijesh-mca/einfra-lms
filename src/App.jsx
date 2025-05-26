@@ -42,8 +42,8 @@ function AppContent() {
       {showSidebar && (
         <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-lg">
           <div className="flex items-center justify-between p-2">
-            <h1 className="text-xl font-bold"></h1>
-            {showMenuButton && (
+            <h1 className="text-xl font-bold clr  ">LMS</h1>
+            {showMenuButton && (  
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="p-2 bg-gray-100 rounded shadow-md"

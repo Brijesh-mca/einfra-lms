@@ -10,7 +10,7 @@ const CourseCard = ({ course, onCourseClick, onPlay }) => (
   <div
     key={course._id}
     className="bg-gray-50 p-4 rounded-xl shadow-lg w-80 flex-shrink-0 relative transition-transform transform hover:scale-105 cursor-pointer"
-    onClick={() => onCourseClick(course._id, course.title)}
+    onClick={() => onCourseClick(course._id, course.title, course.status)}
   >
     {/* Thumbnail container with fixed height */}
     <div className="relative w-full h-36 bg-gray-200 rounded-md mb-3">
@@ -108,24 +108,24 @@ const InstructorRow = ({ instructor, onCourseClick, onPlay }) => {
           </div>
 
           {/* Scroll Left Arrow */} 
-          {instructor.courses.length > 3 && (
+          {/* {instructor.courses.length > 3 && (
             <div
               onClick={scrollLeft}
               className="absolute -left-2 z-[1000] border border-cyan-400 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-lg cursor-pointer "
             >
               <ChevronLeft className="z-[200] w-6 h-6 text-blue-700" />
             </div>
-          )}
+          )} */}
 
           {/* Scroll Right Arrow */}
-          {instructor.courses.length > 3 && (
+          {/* {instructor.courses.length > 3 && (
             <div
               onClick={scrollRight}
               className="absolute -right-2 z-[100] border border-cyan-400 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-md cursor-pointer "
             >
               <ChevronRight className="z-[200] w-6 h-6 text-blue-700" />
             </div>
-          )}
+          )} */}
         </div>
       )}
     </div>
@@ -189,6 +189,7 @@ const AllCoursesPage = () => {
                   totalStudents: course.totalStudents || 0,
                   rating: course.rating || 0,
                   thumbnail: course.thumbnail || null,
+                  status: course.status || "Unknown", // Add status field
                 })),
               };
             } catch (courseError) {
@@ -219,8 +220,8 @@ const AllCoursesPage = () => {
     fetchInstructorsAndCourses();
   }, [navigate, token]);
 
-  const handleCourseClick = (courseId, courseTitle) => {
-    navigate(`/dashboard/course-editor/${courseId}`, { state: { courseTitle } });
+  const handleCourseClick = (courseId, courseTitle, status) => {
+    navigate(`/dashboard/course-editor/${courseId}`, { state: { courseTitle, status } });
   };
 
   const handlePlay = (courseId) => {
