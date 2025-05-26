@@ -107,13 +107,13 @@ const InstructorRow = ({ instructor, onCourseClick, onPlay }) => {
             ))}
           </div>
 
-          {/* Scroll Left Arrow */}
+          {/* Scroll Left Arrow */} 
           {instructor.courses.length > 3 && (
             <div
               onClick={scrollLeft}
-              className="absolute left-0 border border-cyan-400 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-lg cursor-pointer z-10"
+              className="absolute -left-2 z-[1000] border border-cyan-400 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-lg cursor-pointer "
             >
-              <ChevronLeft className="w-6 h-6 text-blue-700" />
+              <ChevronLeft className="z-[200] w-6 h-6 text-blue-700" />
             </div>
           )}
 
@@ -121,9 +121,9 @@ const InstructorRow = ({ instructor, onCourseClick, onPlay }) => {
           {instructor.courses.length > 3 && (
             <div
               onClick={scrollRight}
-              className="absolute right-4 border border-cyan-400 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-md cursor-pointer z-10"
+              className="absolute -right-2 z-[100] border border-cyan-400 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-md cursor-pointer "
             >
-              <ChevronRight className="w-6 h-6 text-blue-700" />
+              <ChevronRight className="z-[200] w-6 h-6 text-blue-700" />
             </div>
           )}
         </div>

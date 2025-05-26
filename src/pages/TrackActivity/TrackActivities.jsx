@@ -34,6 +34,7 @@ export default function Activities() {
     }).format(new Date(dateString));
   };
 
+  // Fetch data without sorting parameters
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -46,17 +47,11 @@ export default function Activities() {
           },
         });
 
-        const instructorSortParam = instructorSort === 'Newest' ? 'createdAt:desc' : 'createdAt:asc';
-        const studentSortParam = studentSort === 'Newest' ? 'createdAt:desc' : 'createdAt:asc';
-
-        const instructorResponse = await axiosInstance.get(
-          `/instructor-activity?limit=${limit}&sort=${instructorSortParam}`
-        );
+        // Fetch data without sort parameters
+        const instructorResponse = await axiosInstance.get(`/instructor-activity?limit=${limit}`);
         const instructorData = instructorResponse.data.data.slice(0, 5);
 
-        const studentResponse = await axiosInstance.get(
-          `/student-activity?limit=${limit}&sort=${studentSortParam}`
-        );
+        const studentResponse = await axiosInstance.get(`/student-activity?limit=${limit}`);
         const studentData = studentResponse.data.data.slice(0, 5);
 
         const mappedInstructors = instructorData.map((inst) => ({
@@ -75,20 +70,8 @@ export default function Activities() {
           createdAt: stud.createdAt || new Date().toISOString(),
         }));
 
-        const sortedInstructors = mappedInstructors.sort((a, b) => {
-          const dateA = new Date(a.createdAt);
-          const dateB = new Date(b.createdAt);
-          return instructorSort === 'Newest' ? dateB - dateA : dateA - dateB;
-        });
-
-        const sortedStudents = mappedStudents.sort((a, b) => {
-          const dateA = new Date(a.createdAt);
-          const dateB = new Date(b.createdAt);
-          return studentSort === 'Newest' ? dateB - dateA : dateA - dateB;
-        });
-
-        setInstructors(sortedInstructors);
-        setStudents(sortedStudents);
+        setInstructors(mappedInstructors);
+        setStudents(mappedStudents);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error.response || error);
@@ -108,7 +91,25 @@ export default function Activities() {
       setError('No authentication token found. Please log in.');
       setLoading(false);
     }
-  }, [token, instructorSort, studentSort, limit]);
+  }, [token, limit]); // Removed instructorSort and studentSort from dependencies
+
+  // Sort instructors and students when sort state changes
+  useEffect(() => {
+    const sortedInstructors = [...instructors].sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return instructorSort === 'Newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    const sortedStudents = [...students].sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return studentSort === 'Newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    setInstructors(sortedInstructors);
+    setStudents(sortedStudents);
+  }, [instructorSort, studentSort]); // Trigger sorting when sort state changes
 
   const handleInstructorSearch = debounce((value) => {
     setInstructorSearch(value);
@@ -142,23 +143,25 @@ export default function Activities() {
 
   return (
     <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-4xl font-bold mt-10 text-center md:text-left">Activities</h1>
-        <div className="flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
-          <Link
-            to="/instructor-activity"
-            className="px-4 py-2 card-bg text-white shadow-lg shadow-black font-bold rounded hover:bg-cyan-600 text-sm"
-          >
-            Instructor Activity
-          </Link>
-          <Link
-            to="/student-activity"
-            className="px-4 py-2 card-bg shadow-lg shadow-black text-white font-bold rounded hover:bg-cyan-600 text-sm"
-          >
-            Student Activity
-          </Link>
-        </div>
-      </div>
+    <div className="flex flex-row justify-between items-center mb-6 md:mb-8">
+  <h1 className="text-2xl md:text-4xl font-bold text-center md:text-left">
+    Activities
+  </h1>
+  <div className="flex flex-row gap-2">
+    <Link
+      to="/instructor-activity"
+      className="px-4 py-2 card-bg border text-white shadow-md shadow-black font-bold rounded hover:bg-cyan-600 text-sm"
+    >
+      Instructor Activity
+    </Link>
+    <Link
+      to="/student-activity"
+      className="px-4 py-2 card-bg border text-white shadow-md shadow-black font-bold rounded hover:bg-cyan-600 text-sm"
+    >
+      Student Activity
+    </Link>
+  </div>
+</div>
 
       {/* Instructors Section */}
       <section className="bg-white p-4 md:p-6 rounded-2xl shadow mb-8 md:mb-10">

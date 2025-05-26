@@ -10,7 +10,6 @@ export default function InstructorActivity() {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('Newest');
   const [limit] = useState(100); // Fetch all entries
-  const [cacheKey, setCacheKey] = useState('');
 
   const token = localStorage.getItem('authToken');
 
@@ -37,69 +36,65 @@ export default function InstructorActivity() {
     }).format(new Date(dateString));
   };
 
+  // Fetch data without sorting parameters
   useEffect(() => {
     const fetchData = async () => {
-      const newCacheKey = `${sort}`;
-      if (newCacheKey !== cacheKey) {
-        setInstructorsCache([]);
-        setCacheKey(newCacheKey);
-      }
+      try {
+        setLoading(true);
+        const axiosInstance = axios.create({
+          baseURL: 'https://lms-backend-flwq.onrender.com/api/v1/admin/analytics',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-      if (!instructorsCache.length) {
-        try {
-          setLoading(true);
-          const axiosInstance = axios.create({
-            baseURL: 'https://lms-backend-flwq.onrender.com/api/v1/admin/analytics',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
+        // Fetch data without sort parameter
+        const response = await axiosInstance.get(`/instructor-activity?limit=${limit}`);
+        const data = response.data.data;
 
-          const sortParam = sort === 'Newest' ? 'createdAt:desc' : 'createdAt:asc';
-          const response = await axiosInstance.get(
-            `/instructor-activity?limit=${limit}&sort=${sortParam}`
-          );
-          const data = response.data.data;
+        const mappedInstructors = data.map((inst) => ({
+          id: inst._id,
+          name: `${inst.instructor.firstName} ${inst.instructor.lastName}`,
+          email: inst.instructor.email,
+          course: inst.title,
+          createdAt: inst.createdAt,
+        }));
 
-          const mappedInstructors = data.map((inst) => ({
-            id: inst._id,
-            name: `${inst.instructor.firstName} ${inst.instructor.lastName}`,
-            email: inst.instructor.email,
-            course: inst.title,
-            createdAt: inst.createdAt,
-          }));
-
-          const sortedInstructors = mappedInstructors.sort((a, b) => {
-            const dateA = new Date(a.createdAt);
-            const dateB = new Date(b.createdAt);
-            return sort === 'Newest' ? dateB - dateA : dateA - dateB;
-          });
-
-          setInstructorsCache(sortedInstructors);
-          setLoading(false);
-        } catch (error) {
-          console.error('Error fetching data:', error.response || error);
-          const errorMessage =
-            error.response?.data?.message ||
-            (error.response?.status === 401
-              ? 'Unauthorized: Please check your token or log in again.'
-              : 'Failed to fetch data. Please try again later.');
-          setError(errorMessage);
-          setLoading(false);
-        }
-      } else {
-        setLoading(false); // Use cached data
+        setInstructorsCache(mappedInstructors);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error.response || error);
+        const errorMessage =
+          error.response?.data?.message ||
+          (error.response?.status === 401
+            ? 'Unauthorized: Please check your token or log in again.'
+            : 'Failed to fetch data. Please try again later.');
+        setError(errorMessage);
+        setLoading(false);
       }
     };
 
-    if (token) {
+    if (token && !instructorsCache.length) {
       fetchData();
-    } else {
+    } else if (!token) {
       setError('No authentication token found. Please log in.');
       setLoading(false);
+    } else {
+      setLoading(false); // Use cached data
     }
-  }, [token, sort, limit, cacheKey, instructorsCache]);
+  }, [token, limit, instructorsCache.length]); // Removed sort and cacheKey from dependencies
+
+  // Sort instructors when sort state changes
+  useEffect(() => {
+    const sortedInstructors = [...instructorsCache].sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return sort === 'Newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    setInstructorsCache(sortedInstructors);
+  }, [sort]); // Trigger sorting when sort state changes
 
   const filteredInstructors = instructorsCache.filter(
     (inst) =>

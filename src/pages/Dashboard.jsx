@@ -123,7 +123,7 @@ const UserList = ({ title, users }) => {
       <div className="mt-4 flex justify-end ">
         <Link
           to={title === "Instructors" ? "/manage-instructor" : "/manage-student"}
-          className="w-32 h-7 shadow shadow-black rounded text-sm card-bg text-white hover:bg-teal-600 flex items-center justify-center"
+          className="w-32 h-7 shadow hover:border shadow-black rounded text-sm card-bg text-white hover:bg-teal-600 flex items-center justify-center"
         >
           Manage {title}
         </Link>

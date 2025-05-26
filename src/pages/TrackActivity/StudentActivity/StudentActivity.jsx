@@ -31,6 +31,7 @@ export default function StudentActivity() {
     }).format(new Date(dateString));
   };
 
+  // Fetch data without sorting parameters
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -43,10 +44,8 @@ export default function StudentActivity() {
           },
         });
 
-        const sortParam = sort === 'Newest' ? 'createdAt:desc' : 'createdAt:asc';
-        const response = await axiosInstance.get(
-          `/student-activity?limit=${limit}&sort=${sortParam}`
-        );
+        // Fetch data without sort parameter
+        const response = await axiosInstance.get(`/student-activity?limit=${limit}`);
         const data = response.data.data;
 
         const mappedStudents = data.map((stud) => ({
@@ -57,13 +56,7 @@ export default function StudentActivity() {
           createdAt: stud.createdAt || new Date().toISOString(),
         }));
 
-        const sortedStudents = mappedStudents.sort((a, b) => {
-          const dateA = new Date(a.createdAt);
-          const dateB = new Date(b.createdAt);
-          return sort === 'Newest' ? dateB - dateA : dateA - dateB;
-        });
-
-        setStudents(sortedStudents);
+        setStudents(mappedStudents);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error.response || error);
@@ -83,7 +76,18 @@ export default function StudentActivity() {
       setError('No authentication token found. Please log in.');
       setLoading(false);
     }
-  }, [token, sort, limit]);
+  }, [token, limit]); // Removed sort from dependencies
+
+  // Sort students when sort state changes
+  useEffect(() => {
+    const sortedStudents = [...students].sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return sort === 'Newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    setStudents(sortedStudents);
+  }, [sort]); // Trigger sorting when sort state changes
 
   const handleSearch = debounce((value) => {
     setSearch(value);
