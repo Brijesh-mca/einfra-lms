@@ -34,7 +34,7 @@ export default function Sidebar({ onLinkClick }) {
     <div className="w-64 bg-white text-white border-r h-full flex flex-col justify-between rounded-xl shadow-lg p-4 border-none">
       <div>
         <div className="flex items-center justify-left pl-[1rem] mb-8">
-          <div className="text-xl font-bold text-cyan-500">LMS</div>
+          <div className="text-xl font-bold clr">LMS</div>
         </div>
         <nav className="space-y-2">
           <NavLink
