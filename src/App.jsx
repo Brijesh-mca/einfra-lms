@@ -58,16 +58,16 @@ function AppContent() {
       <div className={`flex flex-1 ${showSidebar ? 'lg:pt-0 pt-10' : 'pt-0'}`}>
         {showSidebar && (
           <>
-            <aside
-              className={`
-                fixed ${showSidebar ? 'lg:top-0 top-10' : 'top-0'} left-0 h-[100vh] w-64 z-40 bg-white shadow-md
-                transform transition-transform duration-300
-                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                lg:translate-x-0
-              `}
-            >
-              <Sidebar onLinkClick={() => setSidebarOpen(false)} />
-            </aside>
+           <aside
+  className={`
+    fixed ${showSidebar ? 'lg:top-0 top-10' : 'top-0'} left-0 h-[98vh] lg:h-[100vh] w-64 z-40 bg-white shadow-lg border-r border-black 
+    transform transition-transform duration-300
+    ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+    lg:translate-x-0
+  `}
+>
+  <Sidebar onLinkClick={() => setSidebarOpen(false)} />
+</aside>
 
             {sidebarOpen && (
               <div

@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import Loading from '../Loading';
-
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import Loading from "../Loading";
+import { FaChalkboardTeacher, FaUserGraduate } from 'react-icons/fa';
 export default function Activities() {
   const [instructors, setInstructors] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [instructorSearch, setInstructorSearch] = useState('');
-  const [studentSearch, setStudentSearch] = useState('');
-  const [instructorSort, setInstructorSort] = useState('Newest');
-  const [studentSort, setStudentSort] = useState('Newest');
+  const [instructorSearch, setInstructorSearch] = useState("");
+  const [studentSearch, setStudentSearch] = useState("");
+  const [instructorSort, setInstructorSort] = useState("Newest");
+  const [studentSort, setStudentSort] = useState("Newest");
   const [limit] = useState(5); // Strictly 5 items
 
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem("authToken");
 
   // Debounce function
   const debounce = (func, wait) => {
@@ -27,10 +27,10 @@ export default function Activities() {
 
   // Format date
   const formatDate = (dateString) => {
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     }).format(new Date(dateString));
   };
 
@@ -40,18 +40,23 @@ export default function Activities() {
       try {
         setLoading(true);
         const axiosInstance = axios.create({
-          baseURL: 'https://lms-backend-flwq.onrender.com/api/v1/admin/analytics',
+          baseURL:
+            "https://lms-backend-flwq.onrender.com/api/v1/admin/analytics",
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
 
         // Fetch data without sort parameters
-        const instructorResponse = await axiosInstance.get(`/instructor-activity?limit=${limit}`);
+        const instructorResponse = await axiosInstance.get(
+          `/instructor-activity?limit=${limit}`
+        );
         const instructorData = instructorResponse.data.data.slice(0, 5);
 
-        const studentResponse = await axiosInstance.get(`/student-activity?limit=${limit}`);
+        const studentResponse = await axiosInstance.get(
+          `/student-activity?limit=${limit}`
+        );
         const studentData = studentResponse.data.data.slice(0, 5);
 
         const mappedInstructors = instructorData.map((inst) => ({
@@ -66,7 +71,7 @@ export default function Activities() {
           id: stud._id,
           name: `${stud.student.firstName} ${stud.student.lastName}`,
           email: stud.student.email,
-          assignment: stud.course ? stud.course.title : 'No Course Assigned',
+          assignment: stud.course ? stud.course.title : "No Course Assigned",
           createdAt: stud.createdAt || new Date().toISOString(),
         }));
 
@@ -74,12 +79,12 @@ export default function Activities() {
         setStudents(mappedStudents);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching data:', error.response || error);
+        console.error("Error fetching data:", error.response || error);
         const errorMessage =
           error.response?.data?.message ||
           (error.response?.status === 401
-            ? 'Unauthorized: Please check your token or log in again.'
-            : 'Failed to fetch data. Please try again later.');
+            ? "Unauthorized: Please check your token or log in again."
+            : "Failed to fetch data. Please try again later.");
         setError(errorMessage);
         setLoading(false);
       }
@@ -88,7 +93,7 @@ export default function Activities() {
     if (token) {
       fetchData();
     } else {
-      setError('No authentication token found. Please log in.');
+      setError("No authentication token found. Please log in.");
       setLoading(false);
     }
   }, [token, limit]); // Removed instructorSort and studentSort from dependencies
@@ -98,13 +103,13 @@ export default function Activities() {
     const sortedInstructors = [...instructors].sort((a, b) => {
       const dateA = new Date(a.createdAt);
       const dateB = new Date(b.createdAt);
-      return instructorSort === 'Newest' ? dateB - dateA : dateA - dateB;
+      return instructorSort === "Newest" ? dateB - dateA : dateA - dateB;
     });
 
     const sortedStudents = [...students].sort((a, b) => {
       const dateA = new Date(a.createdAt);
       const dateB = new Date(b.createdAt);
-      return studentSort === 'Newest' ? dateB - dateA : dateA - dateB;
+      return studentSort === "Newest" ? dateB - dateA : dateA - dateB;
     });
 
     setInstructors(sortedInstructors);
@@ -138,27 +143,34 @@ export default function Activities() {
   }
 
   if (error) {
-    return <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans text-red-600">{error}</div>;
+    return (
+      <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans text-red-600">
+        {error}
+      </div>
+    );
   }
 
   return (
     <div className="p-4 md:p-8 bg-gray-100 min-h-screen font-sans">
-    <div className="flex flex-row justify-between items-center mb-6 md:mb-8">
+          
+          <div className="flex flex-row justify-between items-center mb-6 md:mb-8">
   <h1 className="text-2xl md:text-4xl font-bold text-center md:text-left">
     Activities
   </h1>
-  <div className="flex flex-row gap-2">
+  <div className="flex flex-row gap-2 sm:gap-4">
     <Link
       to="/instructor-activity"
-      className="px-4 py-2 card-bg border text-white shadow-md shadow-black font-bold rounded hover:bg-cyan-600 text-sm"
+      className="px-3 sm:px-4 py-1 sm:py-2 card-bg border text-white shadow-md shadow-black font-bold rounded hover:bg-cyan-600 text-sm flex items-center justify-center"
     >
-      Instructor Activity
+      <span className="block sm:hidden"> <FaChalkboardTeacher className="text-lg" /></span>
+      <span className="hidden sm:block">Instructor Activity</span>
     </Link>
     <Link
       to="/student-activity"
-      className="px-4 py-2 card-bg border text-white shadow-md shadow-black font-bold rounded hover:bg-cyan-600 text-sm"
+      className="px-3 sm:px-4 py-1 sm:py-2 card-bg border text-white shadow-md shadow-black font-bold rounded hover:bg-cyan-600 text-sm flex items-center justify-center"
     >
-      Student Activity
+      <span className="block sm:hidden"><FaUserGraduate className="text-lg" /></span>
+      <span className="hidden sm:block">Student Activity</span>
     </Link>
   </div>
 </div>
@@ -166,7 +178,9 @@ export default function Activities() {
       {/* Instructors Section */}
       <section className="bg-white p-4 md:p-6 rounded-2xl shadow mb-8 md:mb-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-          <h2 className="text-lg md:text-xl font-semibold text-cyan-600">Instructors</h2>
+          <h2 className="text-lg md:text-xl font-semibold text-cyan-600">
+            Instructors
+          </h2>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <input
               type="text"
@@ -186,7 +200,9 @@ export default function Activities() {
         </div>
 
         {filteredInstructors.length === 0 && (
-          <div className="text-center text-gray-500 py-4">No instructors found</div>
+          <div className="text-center text-gray-500 py-4">
+            No instructors found
+          </div>
         )}
 
         {/* Mobile View (below md) */}
@@ -197,7 +213,9 @@ export default function Activities() {
               className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
             >
               <div className="flex justify-between items-center mb-2">
-                <h3 className="text-base font-medium text-gray-800">{inst.name}</h3>
+                <h3 className="text-base font-medium text-gray-800">
+                  {inst.name}
+                </h3>
               </div>
               <p className="text-sm text-gray-600 mb-1">
                 <span className="font-semibold">ID:</span> {inst.id}
@@ -209,7 +227,8 @@ export default function Activities() {
                 <span className="font-semibold">Course:</span> {inst.course}
               </p>
               <p className="text-sm text-gray-600">
-                <span className="font-semibold">Created:</span> {formatDate(inst.createdAt)}
+                <span className="font-semibold">Created:</span>{" "}
+                {formatDate(inst.createdAt)}
               </p>
             </div>
           ))}
@@ -222,7 +241,9 @@ export default function Activities() {
               key={inst.id}
               className="bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
             >
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">{inst.name}</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                {inst.name}
+              </h3>
               <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
                 <div>
                   <p className="font-semibold">ID:</p>
@@ -264,7 +285,9 @@ export default function Activities() {
                   <td className="whitespace-nowrap px-4">{inst.id}</td>
                   <td className="whitespace-nowrap px-4">{inst.email}</td>
                   <td className="whitespace-nowrap px-4">{inst.course}</td>
-                  <td className="whitespace-nowrap px-4">{formatDate(inst.createdAt)}</td>
+                  <td className="whitespace-nowrap px-4">
+                    {formatDate(inst.createdAt)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -275,7 +298,9 @@ export default function Activities() {
       {/* Students Section */}
       <section className="bg-white p-4 md:p-6 rounded-2xl shadow">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-          <h2 className="text-lg md:text-xl font-semibold text-cyan-600">Students</h2>
+          <h2 className="text-lg md:text-xl font-semibold text-cyan-600">
+            Students
+          </h2>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <input
               type="text"
@@ -295,7 +320,9 @@ export default function Activities() {
         </div>
 
         {filteredStudents.length === 0 && (
-          <div className="text-center text-gray-500 py-4">No students found</div>
+          <div className="text-center text-gray-500 py-4">
+            No students found
+          </div>
         )}
 
         {/* Mobile View (below md) */}
@@ -306,7 +333,9 @@ export default function Activities() {
               className="bg-gray-50 p-4 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
             >
               <div className="flex justify-between items-center mb-2">
-                <h3 className="text-base font-medium text-gray-800">{stud.name}</h3>
+                <h3 className="text-base font-medium text-gray-800">
+                  {stud.name}
+                </h3>
               </div>
               <p className="text-sm text-gray-600 mb-1">
                 <span className="font-semibold">ID:</span> {stud.id}
@@ -315,10 +344,12 @@ export default function Activities() {
                 <span className="font-semibold">Email:</span> {stud.email}
               </p>
               <p className="text-sm text-gray-600 mb-1">
-                <span className="font-semibold">Assignment:</span> {stud.assignment}
+                <span className="font-semibold">Assignment:</span>{" "}
+                {stud.assignment}
               </p>
               <p className="text-sm text-gray-600">
-                <span className="font-semibold">Created:</span> {formatDate(stud.createdAt)}
+                <span className="font-semibold">Created:</span>{" "}
+                {formatDate(stud.createdAt)}
               </p>
             </div>
           ))}
@@ -331,7 +362,9 @@ export default function Activities() {
               key={stud.id}
               className="bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
             >
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">{stud.name}</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                {stud.name}
+              </h3>
               <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
                 <div>
                   <p className="font-semibold">ID:</p>
@@ -373,7 +406,9 @@ export default function Activities() {
                   <td className="whitespace-nowrap px-4">{stud.id}</td>
                   <td className="whitespace-nowrap px-4">{stud.email}</td>
                   <td className="whitespace-nowrap px-4">{stud.assignment}</td>
-                  <td className="whitespace-nowrap px-4">{formatDate(stud.createdAt)}</td>
+                  <td className="whitespace-nowrap px-4">
+                    {formatDate(stud.createdAt)}
+                  </td>
                 </tr>
               ))}
             </tbody>
