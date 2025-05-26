@@ -47,10 +47,10 @@ const CourseCard = ({ course, onCourseClick, onPlay }) => (
 
     <div className="flex justify-between items-center">
       <span className="text-sm font-semibold text-slate-700">
-        ₹{course.discountPrice ?? course.price}
+        ₹{(course.discountPrice ? course.price - course.discountPrice : course.price).toFixed(2)}
       </span>
       {course.discountPrice && (
-        <span className="text-xs text-gray-500 line-through">₹{course.price}</span>
+        <span className="text-xs text-gray-500 line-through">₹{(course.price).toFixed(2)}</span>
       )}
     </div>
 
@@ -58,7 +58,7 @@ const CourseCard = ({ course, onCourseClick, onPlay }) => (
       <span className="text-xs text-gray-700">
         👨‍🎓 {course.totalStudents || 0} Students
       </span>
-      <span className="text-xs text-yellow-500">⭐ {course.rating || "N/A"}</span>
+      <span className="text-xs text-yellow-500">⭐ {course.rating || "0"}</span>
     </div>
   </div>
 );

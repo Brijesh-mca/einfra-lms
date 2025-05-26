@@ -368,7 +368,7 @@ const CourseManagement = () => {
                 Upload Thumbnail
               </button>
             </div>
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            {/* <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Upload Promo Video</h3>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Choose Promo Video
@@ -397,7 +397,7 @@ const CourseManagement = () => {
               >
                 Upload Promo Video
               </button>
-            </div>
+            </div> */}
           </div>
 
           {isTitleModalOpen && (
